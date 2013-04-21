@@ -1,0 +1,43 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "RtcTorrent";
+}
+
+@section Scripts {
+    <script src="@Url.Content("~/Scripts/knockout-2.2.1.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery.signalR-1.0.1.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/signalR/hubs")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/typings/custom/Configuration.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/typings/custom/User.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/typings/custom/Peer.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/typings/custom/Client.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/typings/custom/Torrent.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/typings/custom/FileContent.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        var client = new RtcTorrent.Client();
+        ko.applyBindings(client);
+    </script>
+}
+
+<script type="text/html" id="torrent-template">
+    <div>Peers</div>
+    <div>
+        <!-- ko foreach: peers()-->
+        <div data-bind="text: $data.id()"></div>
+        <!-- /ko -->​
+    </div>
+    <div>Filenames</div>
+    <div>
+        <!-- ko foreach: fileNames()-->
+        <div data-bind="text: $data"></div>
+        <!-- /ko -->​
+    </div>
+</script>
+
+<div class="torrents">
+    <!-- ko foreach: torrents()-->
+    <div data-bind="template: { name: 'torrent-template' }"></div>
+    <!-- /ko -->​
+    <div data-bind="drop: dropTorrent(), visible: sessionReady()">Drop torrent here</div>
+</div>
