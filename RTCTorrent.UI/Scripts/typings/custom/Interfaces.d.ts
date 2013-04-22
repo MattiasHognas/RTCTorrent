@@ -6,7 +6,8 @@ declare var Bencode: any;
 interface Window {
     PERSISTENT: any;
     webkitStorageInfo: storageInfo;
-    requestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
+    webkitRequestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
+    mozRequestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
 }
 
 interface ProgressEvent {
@@ -49,6 +50,7 @@ interface RTCPeerConnection {
 }
 
 interface IConfiguration {
+    requestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) => void;
     createPeerConnection: (handleConnection: () => void ) => RTCPeerConnection;
     getUserMedia: (constraints: MediaStreamConstraints, successCallback: (stream: LocalMediaStream) => void , errorCallback: (error: Error) => void ) => any;
     attachMediaStream: (root: any, stream: any) => void;
@@ -74,14 +76,22 @@ interface IUser {
 
 interface ITorrent {
     client: IClient;
-    peers: KnockoutObservableArray;
     id: KnockoutObservableString;
+    name: KnockoutObservableString;
+    size: KnockoutObservableNumber;
+    peers: KnockoutObservableArray;
+    files: KnockoutObservableArray;
+    readyToServe: KnockoutObservableBool;
+    fs: any;
     createPeer: (id: string) => void;
     findPeer: (id: string) => IPeer;
     removePeer: (id: string) => void;
 }
 
 interface IPeer extends IUser {
+    channel: RTCDataChannel;
+    channelOpened: bool;
+    torrent: ITorrent;
     onJsepOffer: (message: any) => void;
     onJsepAnswer: (message: any) => void;
     onJsepCandidate: (message: any) => void;
@@ -90,7 +100,4 @@ interface IPeer extends IUser {
 }
 
 interface IFileContent {
-    save: (fileSystem: any, directory: string, file: string, data: string) => void;
-    requestQuota: (byteSize: number, ready: (e: any) => void , error: (e: any) => void) => void;
-    read: (file: File, ready: (data: string) => void) => void;
 }

@@ -12,10 +12,33 @@ var RtcTorrent;
                 _super.call(this);
             this.configuration = null;
             this.socket = null;
+            var _this = this;
             this.sessionReady = ko.observable(false);
             this.torrents = ko.observableArray([]);
             this.trackerFiles = ko.observableArray([]);
             this.configuration = new RtcTorrent.Configuration();
+            this.loadTorrent = function (trackerTorrent) {
+                console.log('Loading torrent', trackerTorrent);
+                if(_this.sessionReady()) {
+                    var torrent = new RtcTorrent.Torrent(trackerTorrent.id, trackerTorrent.name, trackerTorrent.size, _this);
+                    _this.torrents.push(torrent);
+                    _this.socket.server.joinTorrent({
+                        SessionId: _this.id(),
+                        TorrentId: torrent.id()
+                    });
+                }
+            };
+            this.removeTorrent = function (trackerTorrent) {
+                console.log('Removing torrent', trackerTorrent);
+                var torrent = _this.findTorrent(trackerTorrent.id);
+                if(torrent) {
+                    _this.socket.server.leaveTorrent({
+                        SessionId: _this.id(),
+                        TorrentId: torrent.id()
+                    });
+                    _this.torrents.remove(torrent);
+                }
+            };
             if(!this.configuration.webRTCSupport) {
                 console.error('Your browser doesn\'t seem to support WebRTC');
             } else {
@@ -58,28 +81,6 @@ var RtcTorrent;
                 };
             }
         }
-        Client.prototype.loadTorrent = function (id) {
-            console.log('Loading torrent');
-            if(this.sessionReady) {
-                var torrent = new RtcTorrent.Torrent(id, this);
-                this.torrents.push(torrent);
-                this.socket.server.joinTorrent({
-                    SessionId: this.id(),
-                    TorrentId: torrent.id()
-                });
-            }
-        };
-        Client.prototype.removeTorrent = function (id) {
-            console.log('Removing torrent');
-            var torrent = this.findTorrent(id);
-            if(torrent) {
-                this.socket.server.leaveTorrent({
-                    SessionId: this.id(),
-                    TorrentId: torrent.id()
-                });
-                this.torrents.remove(torrent);
-            }
-        };
         Client.prototype.findOrCreatePeer = function (id, torrentId) {
             var torrent = this.findTorrent(torrentId);
             if(torrent) {

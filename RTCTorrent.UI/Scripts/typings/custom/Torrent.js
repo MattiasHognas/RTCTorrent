@@ -1,19 +1,79 @@
-var __extends = this.__extends || function (d, b) {
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
 var RtcTorrent;
 (function (RtcTorrent) {
     'use strict';
-    var Torrent = (function (_super) {
-        __extends(Torrent, _super);
-        function Torrent(id, client) {
-                _super.call(this);
+    var Torrent = (function () {
+        function Torrent(id, name, size, client) {
+            this.fs = null;
             this.client = client;
-            this.peers = ko.observableArray([]);
             this.id = ko.observable(id);
+            this.name = ko.observable(name);
+            this.size = ko.observable(size);
+            this.peers = ko.observableArray([]);
+            this.files = ko.observableArray([]);
+            this.readyToServe = ko.observable(false);
+            this.loadFiles();
         }
+        Torrent.prototype.quotaError = function (e) {
+            var msg = '';
+            switch(e.code) {
+                case FileError.QUOTA_EXCEEDED_ERR:
+                    msg = 'QUOTA_EXCEEDED_ERR';
+                    break;
+                case FileError.NOT_FOUND_ERR:
+                    msg = 'NOT_FOUND_ERR';
+                    break;
+                case FileError.SECURITY_ERR:
+                    msg = 'SECURITY_ERR';
+                    break;
+                case FileError.INVALID_MODIFICATION_ERR:
+                    msg = 'INVALID_MODIFICATION_ERR';
+                    break;
+                case FileError.INVALID_STATE_ERR:
+                    msg = 'INVALID_STATE_ERR';
+                    break;
+                default:
+                    msg = 'Unknown Error';
+                    break;
+            }
+            ;
+            console.log('Error: ' + msg);
+        };
+        Torrent.prototype.loadFiles = function () {
+            var _this = this;
+            _this.client.configuration.requestFileSystem(window.PERSISTENT, _this.size, function (fs) {
+                _this.fs = fs;
+                _this.fs.root.getDirectory(_this.id(), {
+                }, function (dirEntry) {
+                    var dirReader = dirEntry.createReader();
+                    var readEntries = function () {
+                        dirReader.readEntries(function (results) {
+                            if(!results.length) {
+                                _this.readyToServe(true);
+                            } else {
+                                for(var i = 0; i < results.length; i++) {
+                                    var entry = results[i];
+                                    if(entry.isDirectory) {
+                                        console.log('Directory: ' + entry.fullPath);
+                                    } else if(entry.isFile) {
+                                        console.log('File: ' + entry.fullPath);
+                                        _this.files.push(new RtcTorrent.FileContent(_this, entry));
+                                    }
+                                }
+                                readEntries();
+                            }
+                        }, function (e) {
+                            console.log('readEntries error', e);
+                        });
+                    };
+                    readEntries();
+                }, function (e) {
+                    console.log('getDictionary error', e);
+                });
+            }, _this.quotaError);
+        };
+        Torrent.prototype.sendMessage = function (message, id) {
+            this.findPeer(id).channel.send(message);
+        };
         Torrent.prototype.createPeer = function (id) {
             var peer = new RtcTorrent.Peer(id, this);
             this.peers.push(peer);
@@ -33,6 +93,6 @@ var RtcTorrent;
             }
         };
         return Torrent;
-    })(RtcTorrent.FileContent);
+    })();
     RtcTorrent.Torrent = Torrent;    
 })(RtcTorrent || (RtcTorrent = {}));

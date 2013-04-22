@@ -24,6 +24,9 @@ var RtcTorrent;
                 ]
             };
             if(navigator.mozGetUserMedia) {
+                this.requestFileSystem = function (type, grantedBytes, quotaGranted, quotaError) {
+                    return window.mozRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
+                };
                 this.createPeerConnection = function (handleConnection) {
                     var pc = new window.mozRTCPeerConnection(pcConfig, pcConstraints);
                     return pc;
@@ -66,6 +69,9 @@ var RtcTorrent;
                     pc.addIceCandidate(candidate);
                 };
             } else if(navigator.webkitGetUserMedia) {
+                this.requestFileSystem = function (type, grantedBytes, quotaGranted, quotaError) {
+                    return window.webkitRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
+                };
                 this.createPeerConnection = function (handleConnection) {
                     var pc = new window.webkitRTCPeerConnection(pcConfig, pcConstraints);
                     pc.onconnection = handleConnection.bind(this);

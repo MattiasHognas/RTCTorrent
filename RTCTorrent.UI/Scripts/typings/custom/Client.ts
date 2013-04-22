@@ -13,13 +13,32 @@ module RtcTorrent {
         public torrents: KnockoutObservableArray;
         public trackerFiles: KnockoutObservableArray;
         public configuration: IConfiguration = null;
+        public loadTorrent: (trackerTorrent: any) => void;
+        public removeTorrent: (trackerTorrent: any) => void;
         public socket: any = null;
         constructor() {
             super();
+            var _this = this;
             this.sessionReady = ko.observable(false);
             this.torrents = ko.observableArray([]);
             this.trackerFiles = ko.observableArray([]);
             this.configuration = new Configuration();
+            this.loadTorrent = function(trackerTorrent: any) {
+                console.log('Loading torrent', trackerTorrent);
+                if (_this.sessionReady()) {
+                    var torrent: ITorrent = new Torrent(trackerTorrent.id, trackerTorrent.name, trackerTorrent.size, _this);
+                    _this.torrents.push(torrent);
+                    _this.socket.server.joinTorrent({ SessionId: _this.id(), TorrentId: torrent.id() });
+                }
+            };
+            this.removeTorrent = function(trackerTorrent: any) {
+                console.log('Removing torrent', trackerTorrent);
+                var torrent: ITorrent = _this.findTorrent(trackerTorrent.id);
+                if (torrent) {
+                    _this.socket.server.leaveTorrent({ SessionId: _this.id(), TorrentId: torrent.id() });
+                    _this.torrents.remove(torrent);
+                }
+            };
             if (!this.configuration.webRTCSupport) {
                 console.error('Your browser doesn\'t seem to support WebRTC');
             } else {
@@ -32,6 +51,7 @@ module RtcTorrent {
                     console.log('Connection done', $.connection.hub.id);
                     _this.id($.connection.hub.id);
                     _this.sessionReady(true);
+                    // TODO: Load torrents from localStorage.
                 }).fail(function (e) {
                     var message = 'Unable to connect to SignalR Hubs: ' + e;
                     console.log(message);
@@ -60,22 +80,6 @@ module RtcTorrent {
                     console.log('another user left', message);
                     _this.removePeer(message.SessionId, message.TorrentId);
                 };
-            }
-        }
-        loadTorrent(id: string) {
-            console.log('Loading torrent');
-            if (this.sessionReady) {
-                var torrent: ITorrent = new Torrent(id, this);
-                this.torrents.push(torrent);
-                this.socket.server.joinTorrent({ SessionId: this.id(), TorrentId: torrent.id() });
-            }
-        }
-        removeTorrent(id: string) {
-            console.log('Removing torrent');
-            var torrent: ITorrent = this.findTorrent(id);
-            if (torrent) {
-                this.socket.server.leaveTorrent({ SessionId: this.id(), TorrentId: torrent.id() });
-                this.torrents.remove(torrent);
             }
         }
         findOrCreatePeer(id: string, torrentId: string) {

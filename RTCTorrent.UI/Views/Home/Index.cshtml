@@ -16,47 +16,43 @@
     <script src="@Url.Content("~/Scripts/typings/custom/FileContent.js")" type="text/javascript"></script>
     <script type="text/javascript">
         var client = new RtcTorrent.Client();
+        ko.applyBindings(client);
+        @* TODO: handle this with ajax requests on the listing of "torrents" *@
         @foreach (var item in Model)
         {
-            @* TODO: handle this in ajax requests on listing of "torrents" *@
             <text>client.trackerFiles.push(
             {
                 id: '@item.Id',
                 name: '@item.Name',
                 seeders: '@item.Seeders',
                 leechers: '@item.Leechers',
+                size: '@item.Size',
                 files: ['@string.Join("','", item.Files)']
             });</text>
         }
-        ko.applyBindings(client);
     </script>
 }
-
-<script type="text/html" id="localFiles-template">
-    <div>Peers</div>
-    <ul data-bind="foreach: peers()">
-        <li data-bind="text: $data.id()"></li>
-    </ul>
-    <div>Filenames</div>
-    <ul data-bind="foreach: fileNames()">
-        <li data-bind="text: $data"></li>
-    </ul>
-</script>
-
-<script type="text/html" id="trackerFiles-template">
-    <div data-bind="text: $data.id(), click: $parent.loadTorrent($data.id())"></div>
-</script>
 
 <div>My files</div>
 <div>
     <!-- ko foreach: torrents()-->
-    <div data-bind="template: { name: 'localFiles-template' }"></div>
+    <div>
+        <div data-bind="text: $data.name()"></div>
+        <div>Peers</div>
+        <ul data-bind="foreach: peers()">
+            <li data-bind="text: $data.id()"></li>
+        </ul>
+        <div>Torrents</div>
+        <ul data-bind="foreach: files()">
+            <li data-bind="text: $data"></li>
+        </ul>
+    </div>
     <!-- /ko -->​
 </div>
 
 <div>Tracker files</div>
 <div>
     <!-- ko foreach: trackerFiles()-->
-    <div data-bind="template: { name: 'trackerFiles-template' }"></div>
+    <div data-bind="text: $data.name, click: $parent.loadTorrent.bind($data)"></div>
     <!-- /ko -->​
 </div>

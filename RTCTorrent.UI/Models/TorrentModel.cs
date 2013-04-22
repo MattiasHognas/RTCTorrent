@@ -9,5 +9,6 @@ namespace RTCTorrent.UI.Models
         public List<string> Files { get; set; }
         public int Seeders { get; set; }
         public int Leechers { get; set; }
+        public long Size { get; set; }
     }
 }

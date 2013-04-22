@@ -6,6 +6,7 @@
 module RtcTorrent {
     'use strict';
     export class Configuration implements IConfiguration {
+        public requestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) => void;
         public createPeerConnection: (handleConnection: () => void ) => RTCPeerConnection;
         public getUserMedia: (constraints: MediaStreamConstraints, successCallback: (stream: LocalMediaStream) => void , errorCallback: (error: Error) => void ) => any;
         public attachMediaStream: (root: any, stream: any) => void;
@@ -35,6 +36,9 @@ module RtcTorrent {
                 ]
             };
             if (navigator.mozGetUserMedia) {
+                this.requestFileSystem = function (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) {
+                    return window.mozRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
+                };
                 this.createPeerConnection = function (handleConnection: () => void ) {
                     var pc = new window.mozRTCPeerConnection(pcConfig, pcConstraints);
                     return pc;
@@ -77,6 +81,9 @@ module RtcTorrent {
                     pc.addIceCandidate(candidate);
                 }
             } else if (navigator.webkitGetUserMedia) {
+                this.requestFileSystem = function (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) {
+                    return window.webkitRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
+                };
                 this.createPeerConnection = function (handleConnection: () => void ) {
                     var pc = new window.webkitRTCPeerConnection(pcConfig, pcConstraints);
                     pc.onconnection = handleConnection.bind(this);
