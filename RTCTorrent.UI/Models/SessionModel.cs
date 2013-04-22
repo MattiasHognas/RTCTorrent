@@ -12,7 +12,7 @@ namespace RTCTorrent.UI.Models
         public Guid SessionId { get; set; }
 
         [DataMember]
-        [JsonProperty(PropertyName = "RoomId")]
-        public string RoomId { get; set; }
+        [JsonProperty(PropertyName = "TorrentId")]
+        public string TorrentId { get; set; }
     }
 }

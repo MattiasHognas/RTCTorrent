@@ -14,8 +14,8 @@ var RtcTorrent;
             };
             var pcConstraints = {
                 mandatory: {
-                    OfferToReceiveAudio: true,
-                    OfferToReceiveVideo: true
+                    OfferToReceiveAudio: false,
+                    OfferToReceiveVideo: false
                 },
                 optional: [
                     {

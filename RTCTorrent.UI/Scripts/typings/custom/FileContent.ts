@@ -3,14 +3,34 @@
 module RtcTorrent {
     'use strict';
     export class FileContent implements IFileContent {
+        public fs: any = null;
         constructor()
         {
         }
-        quotaGranted(e: any, bytes: any, path: string, name: string)
-        {
-            // TODO
+        //TODO: Pretty much everything need to be rewritted..
+        private writeFile(entry, fullPath, data) {
+            var _this = this;
+            entry.getFile(fullPath, { create: true, exclusive: false }, function (fileEntry) {
+                fileEntry.createWriter(function (writer) {
+                    //var blobBuilder = new webkitBlobBuilder();
+                    //blobBuilder.append(byteArray.buffer);
+                    //writer.seek(writer.length);
+                    writer.onwriteend = function (evt) {
+                        console.log("onwriteend");
+                    };
+                    writer.write(data);
+                    writer.abort();
+                }, function (e) { console.log('error', e) });
+            }, function (e) { console.log('error', e) });
         }
-        quotaError(e: any)
+        save(fileSystem: any, directory: string, file: string, data: string) {
+            var _this = this;
+            fileSystem.root.getDirectory(directory, {create: true}, function(entry){
+                console.log('getDirectory success');
+                _this.writeFile(entry, directory + "/" + file, data);
+            } ,function (e) { console.log('error', e) });
+        }
+        private quotaError(e: any)
         {
             var msg = '';
             switch (e.code) {
@@ -35,13 +55,26 @@ module RtcTorrent {
             };
             console.log('Error: ' + msg);
         }
-        save(bytes: any, path: string, name: string, byteSize: number) {
+        requestQuota(byteSize: number, ready: (e: any) => void , error: (e: any) => void) {
             var _this = this;
-            window.webkitStorageInfo.requestQuota(window.PERSISTENT, byteSize, function (grantedBytes) {
-                window.requestFileSystem(window.PERSISTENT, grantedBytes, function(e: any) {_this.quotaGranted(e, bytes, path, name)}, _this.quotaError);
-            }, function (e) {
-                console.log('Error', e);
-            });
+            window.webkitStorageInfo.requestQuota(
+                window.PERSISTENT,
+                byteSize,
+                function (grantedBytes) {
+                    window.requestFileSystem(
+                        window.PERSISTENT,
+                        grantedBytes,
+                        function (e: any) {
+                            ready(e);
+                        },
+                        function (e: any) {
+                            error(_this.quotaError(e));
+                        });
+                }, function (e) {
+                    error(e);
+                    console.log('Error', e);
+                }
+            );
         }
         read(file: File, ready: (data: string) => void)
         {

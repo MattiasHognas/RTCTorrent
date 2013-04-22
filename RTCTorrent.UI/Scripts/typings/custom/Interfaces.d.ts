@@ -26,7 +26,7 @@ declare var FileError: {
 }
 
 interface SignalR {
-    roomHub: any;
+    torrentHub: any;
 }
 
 interface Navigator {
@@ -74,9 +74,6 @@ interface IUser {
 
 interface ITorrent {
     client: IClient;
-    name: string;
-    fileNames: string[];
-    announceList: string[];
     peers: KnockoutObservableArray;
     id: KnockoutObservableString;
     createPeer: (id: string) => void;
@@ -93,6 +90,7 @@ interface IPeer extends IUser {
 }
 
 interface IFileContent {
-    save: (bytes: any, path: string, name: string, byteSize: number) => void;
+    save: (fileSystem: any, directory: string, file: string, data: string) => void;
+    requestQuota: (byteSize: number, ready: (e: any) => void , error: (e: any) => void) => void;
     read: (file: File, ready: (data: string) => void) => void;
 }

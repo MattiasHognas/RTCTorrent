@@ -11,43 +11,20 @@ module RtcTorrent {
     export class Client implements IClient extends User {
         public sessionReady: KnockoutObservableBool;
         public torrents: KnockoutObservableArray;
+        public trackerFiles: KnockoutObservableArray;
         public configuration: IConfiguration = null;
         public socket: any = null;
         constructor() {
             super();
             this.sessionReady = ko.observable(false);
             this.torrents = ko.observableArray([]);
+            this.trackerFiles = ko.observableArray([]);
             this.configuration = new Configuration();
-            this.init();
-        }
-        dropTorrent(file: File) {
-            var fileContent: IFileContent = new FileContent();
-            fileContent.read(file, function(data:string) {
-                this.loadTorrent(data);
-            });
-        }
-        loadTorrent(content: string) {
-            console.log('Loading torrent');
-            if (this.sessionReady) {
-                var torrent = new Torrent(content, this);
-                this.torrents.push(torrent);
-                this.socket.server.joinRoom({ SessionId: this.id(), RoomId: torrent.id() });
-            }
-        }
-        removeTorrent(id: string) {
-            console.log('Removing torrent');
-            var torrent: ITorrent = this.findTorrent(id);
-            if (torrent) {
-                this.socket.server.leaveRoom({ SessionId: this.id(), RoomId: torrent.id() });
-                this.torrents.remove(torrent);
-            }
-        }
-        init() {
             if (!this.configuration.webRTCSupport) {
                 console.error('Your browser doesn\'t seem to support WebRTC');
             } else {
                 var _this = this;
-                this.socket = $.connection.roomHub;
+                this.socket = $.connection.torrentHub;
                 $.connection.hub.logging = false;
                 $.connection.hub.start({
                     transport: 'auto'
@@ -61,34 +38,50 @@ module RtcTorrent {
                 });
                 this.socket.client.onJsepOffer = function (message) {
                     console.log('got JSEP offer', message);
-                    var peer = _this.findOrCreatePeer(message.FromSessionId, message.RoomId);
+                    var peer = _this.findOrCreatePeer(message.FromSessionId, message.TorrentId);
                     peer.onJsepOffer(message);
                 };
                 this.socket.client.onJsepAnswer = function (message) {
                     console.log('got JSEP answer', message);
-                    var peer = _this.findOrCreatePeer(message.FromSessionId, message.RoomId);
+                    var peer = _this.findOrCreatePeer(message.FromSessionId, message.TorrentId);
                     peer.onJsepAnswer(message);
                 };
                 this.socket.client.onJsepCandidate = function (message) {
                     console.log('got JSEP candidate', message);
-                    var peer = _this.findOrCreatePeer(message.FromSessionId, message.RoomId);
+                    var peer = _this.findOrCreatePeer(message.FromSessionId, message.TorrentId);
                     peer.onJsepCandidate(message);
                 };
-                this.socket.client.onJoinedRoom = function (message) {
+                this.socket.client.onJoinedTorrent = function (message) {
                     console.log('another user joined', message);
-                    var peer = _this.findOrCreatePeer(message.SessionId, message.RoomId);
+                    var peer = _this.findOrCreatePeer(message.SessionId, message.TorrentId);
                     peer.start();
                 };
-                this.socket.client.onLeftRoom = function (message) {
+                this.socket.client.onLeftTorrent = function (message) {
                     console.log('another user left', message);
-                    _this.removePeer(message.SessionId, message.RoomId);
+                    _this.removePeer(message.SessionId, message.TorrentId);
                 };
             }
         }
-        findOrCreatePeer(id: string, torrentId: string) {
-            var torrent = this.findTorrent(torrentId);
+        loadTorrent(id: string) {
+            console.log('Loading torrent');
+            if (this.sessionReady) {
+                var torrent: ITorrent = new Torrent(id, this);
+                this.torrents.push(torrent);
+                this.socket.server.joinTorrent({ SessionId: this.id(), TorrentId: torrent.id() });
+            }
+        }
+        removeTorrent(id: string) {
+            console.log('Removing torrent');
+            var torrent: ITorrent = this.findTorrent(id);
             if (torrent) {
-                var peer = torrent.findPeer(id);
+                this.socket.server.leaveTorrent({ SessionId: this.id(), TorrentId: torrent.id() });
+                this.torrents.remove(torrent);
+            }
+        }
+        findOrCreatePeer(id: string, torrentId: string) {
+            var torrent: ITorrent = this.findTorrent(torrentId);
+            if (torrent) {
+                var peer: IPeer = torrent.findPeer(id);
                 if (!peer) {
                     torrent.createPeer(id);
                 }

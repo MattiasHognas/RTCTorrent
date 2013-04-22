@@ -3,8 +3,37 @@ var RtcTorrent;
     'use strict';
     var FileContent = (function () {
         function FileContent() {
+            this.fs = null;
         }
-        FileContent.prototype.quotaGranted = function (e, bytes, path, name) {
+        FileContent.prototype.writeFile = function (entry, fullPath, data) {
+            var _this = this;
+            entry.getFile(fullPath, {
+                create: true,
+                exclusive: false
+            }, function (fileEntry) {
+                fileEntry.createWriter(function (writer) {
+                    writer.onwriteend = function (evt) {
+                        console.log("onwriteend");
+                    };
+                    writer.write(data);
+                    writer.abort();
+                }, function (e) {
+                    console.log('error', e);
+                });
+            }, function (e) {
+                console.log('error', e);
+            });
+        };
+        FileContent.prototype.save = function (fileSystem, directory, file, data) {
+            var _this = this;
+            fileSystem.root.getDirectory(directory, {
+                create: true
+            }, function (entry) {
+                console.log('getDirectory success');
+                _this.writeFile(entry, directory + "/" + file, data);
+            }, function (e) {
+                console.log('error', e);
+            });
         };
         FileContent.prototype.quotaError = function (e) {
             var msg = '';
@@ -31,13 +60,16 @@ var RtcTorrent;
             ;
             console.log('Error: ' + msg);
         };
-        FileContent.prototype.save = function (bytes, path, name, byteSize) {
+        FileContent.prototype.requestQuota = function (byteSize, ready, error) {
             var _this = this;
             window.webkitStorageInfo.requestQuota(window.PERSISTENT, byteSize, function (grantedBytes) {
                 window.requestFileSystem(window.PERSISTENT, grantedBytes, function (e) {
-                    _this.quotaGranted(e, bytes, path, name);
-                }, _this.quotaError);
+                    ready(e);
+                }, function (e) {
+                    error(_this.quotaError(e));
+                });
             }, function (e) {
+                error(e);
                 console.log('Error', e);
             });
         };

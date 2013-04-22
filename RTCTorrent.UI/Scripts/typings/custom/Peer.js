@@ -23,8 +23,6 @@ var RtcTorrent;
             this.pc = this.torrent.client.configuration.createPeerConnection(this.handleConnection);
             this.handleConnection();
             this.pc.onicecandidate = this.onIceCandidate.bind(this);
-            this.pc.onaddstream = this.handleRemoteStreamAdded.bind(this);
-            this.pc.onremovestream = this.handleStreamRemoved.bind(this);
         }
         Peer.prototype.onJsepOffer = function (message) {
             console.log('got JSEP offer');
@@ -46,7 +44,7 @@ var RtcTorrent;
                 this.torrent.client.socket.server.jsepCandidate({
                     FromSessionId: this.torrent.client.id(),
                     ToSessionId: this.id(),
-                    RoomId: this.torrent.id(),
+                    TorrentId: this.torrent.id(),
                     Message: JSON.stringify({
                         label: event.candidate.sdpMLineIndex,
                         id: event.candidate.sdpMid,
@@ -66,7 +64,7 @@ var RtcTorrent;
                 var message = {
                     FromSessionId: _this.torrent.client.id(),
                     ToSessionId: _this.id(),
-                    RoomId: _this.torrent.id(),
+                    TorrentId: _this.torrent.id(),
                     Message: JSON.stringify(sessionDescription)
                 };
                 console.log('sending offer', message);
@@ -82,20 +80,12 @@ var RtcTorrent;
                 var message = {
                     FromSessionId: _this.torrent.client.id(),
                     ToSessionId: _this.id(),
-                    RoomId: _this.torrent.id(),
+                    TorrentId: _this.torrent.id(),
                     Message: JSON.stringify(sessionDescription)
                 };
                 console.log('sending answer', message);
                 _this.torrent.client.socket.server.jsepAnswer(message);
             }, null, _this.mediaConstraints);
-        };
-        Peer.prototype.handleRemoteStreamAdded = function (event) {
-            console.log('handleRemoteStreamAdded');
-            this.torrent.client.configuration.attachMediaStream(this, event.stream);
-        };
-        Peer.prototype.handleStreamRemoved = function () {
-            console.log('handleStreamRemoved');
-            this.torrent.removePeer(this.id());
         };
         Peer.prototype.handleDataChannel = function (event) {
             console.log('handleDataChannel');

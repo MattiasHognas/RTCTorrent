@@ -1,16 +1,18 @@
+var __extends = this.__extends || function (d, b) {
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var RtcTorrent;
 (function (RtcTorrent) {
     'use strict';
-    var Torrent = (function () {
-        function Torrent(content, client) {
+    var Torrent = (function (_super) {
+        __extends(Torrent, _super);
+        function Torrent(id, client) {
+                _super.call(this);
             this.client = client;
-            var parsedContent = Bencode.parse(content);
-            this.name = Bencode.torrentInfo(parsedContent, 'name');
-            this.fileNames = Bencode.torrentInfo(parsedContent, 'file-names');
-            this.announceList = Bencode.torrentInfo(parsedContent, 'announce-list');
-            console.log(this.name, this.fileNames, this.announceList);
             this.peers = ko.observableArray([]);
-            this.id = ko.observable(name);
+            this.id = ko.observable(id);
         }
         Torrent.prototype.createPeer = function (id) {
             var peer = new RtcTorrent.Peer(id, this);
@@ -31,6 +33,6 @@ var RtcTorrent;
             }
         };
         return Torrent;
-    })();
+    })(RtcTorrent.FileContent);
     RtcTorrent.Torrent = Torrent;    
 })(RtcTorrent || (RtcTorrent = {}));

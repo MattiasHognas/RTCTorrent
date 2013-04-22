@@ -24,8 +24,8 @@ module RtcTorrent {
             this.pc = this.torrent.client.configuration.createPeerConnection(this.handleConnection);
             this.handleConnection();
             this.pc.onicecandidate = this.onIceCandidate.bind(this);
-            this.pc.onaddstream = this.handleRemoteStreamAdded.bind(this);
-            this.pc.onremovestream = this.handleStreamRemoved.bind(this);
+            //this.pc.onaddstream = this.handleRemoteStreamAdded.bind(this);
+            //this.pc.onremovestream = this.handleStreamRemoved.bind(this);
         }
         onJsepOffer(message) {
             console.log('got JSEP offer');
@@ -47,7 +47,7 @@ module RtcTorrent {
                 this.torrent.client.socket.server.jsepCandidate({
                     FromSessionId: this.torrent.client.id(),
                     ToSessionId: this.id(),
-                    RoomId: this.torrent.id(),
+                    TorrentId: this.torrent.id(),
                     Message: JSON.stringify({
                         label: event.candidate.sdpMLineIndex,
                         id: event.candidate.sdpMid,
@@ -64,7 +64,7 @@ module RtcTorrent {
             this.pc.createOffer(function (sessionDescription) {
                 console.log('setting local description');
                 _this.pc.setLocalDescription(sessionDescription);
-                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), RoomId: _this.torrent.id(), Message: JSON.stringify(sessionDescription) };
+                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), TorrentId: _this.torrent.id(), Message: JSON.stringify(sessionDescription) };
                 console.log('sending offer', message);
                 _this.torrent.client.socket.server.jsepOffer(message);
             }, null, _this.mediaConstraints);
@@ -75,20 +75,19 @@ module RtcTorrent {
             this.pc.createAnswer(function (sessionDescription) {
                 console.log('setting local description');
                 _this.pc.setLocalDescription(sessionDescription);
-                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), RoomId: _this.torrent.id(), Message: JSON.stringify(sessionDescription) };
+                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), TorrentId: _this.torrent.id(), Message: JSON.stringify(sessionDescription) };
                 console.log('sending answer', message);
                 _this.torrent.client.socket.server.jsepAnswer(message);
             }, null, _this.mediaConstraints);
         }
-        handleRemoteStreamAdded(event: any) {
-            console.log('handleRemoteStreamAdded');
-            //this.parent.addMetadata(this);
-            this.torrent.client.configuration.attachMediaStream(this, event.stream);
-        }
-        handleStreamRemoved() {
-            console.log('handleStreamRemoved');
-            this.torrent.removePeer(this.id());
-        }
+        //handleRemoteStreamAdded(event: any) {
+        //    console.log('handleRemoteStreamAdded');
+        //    this.torrent.client.configuration.attachMediaStream(this, event.stream);
+        //}
+        //handleStreamRemoved() {
+        //    console.log('handleStreamRemoved');
+        //    this.torrent.removePeer(this.id());
+        //}
         handleDataChannel(event: RTCDataChannelEvent) {
             console.log('handleDataChannel');
             this.addDataChannelEvents(event.channel);

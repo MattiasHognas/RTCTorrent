@@ -144,10 +144,11 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Models\TorrentModel.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Hubs\RoomHub.cs" />
+    <Compile Include="Hubs\TorrentHub.cs" />
     <Compile Include="Models\SessionModel.cs" />
     <Compile Include="Models\SignalStateModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -242,7 +243,6 @@
     <Content Include="Scripts\linq.js" />
     <Content Include="Scripts\linq.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Scripts\require.js" />
     <Content Include="Scripts\typings\custom\Client.js">
       <DependentUpon>Client.ts</DependentUpon>
     </Content>

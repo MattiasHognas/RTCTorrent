@@ -24,8 +24,8 @@ module RtcTorrent {
             };
             var pcConstraints: MediaConstraints = {
                 mandatory: {
-                    OfferToReceiveAudio: true,
-                    OfferToReceiveVideo: true
+                    OfferToReceiveAudio: false,
+                    OfferToReceiveVideo: false
                 },
                 optional: [
                     {

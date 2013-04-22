@@ -10,14 +10,14 @@ using RTCTorrent.UI.Models;
 
 namespace RTCTorrent.UI.Hubs
 {
-    [HubName("roomHub")]
-    public class RoomHub : Hub
+    [HubName("torrentHub")]
+    public class TorrentHub : Hub
     {
         #region Singleton
 
-        private static readonly Lazy<RoomHub> instance = new Lazy<RoomHub>(() => new RoomHub());
+        private static readonly Lazy<TorrentHub> instance = new Lazy<TorrentHub>(() => new TorrentHub());
 
-        public static RoomHub Instance
+        public static TorrentHub Instance
         {
             get
             {
@@ -29,60 +29,63 @@ namespace RTCTorrent.UI.Hubs
 
         #region Fields and Properties
 
-        private static readonly ConcurrentDictionary<Guid, Tuple<string, SessionModel>> sessionToConnection = new ConcurrentDictionary<Guid, Tuple<string, SessionModel>>();
-        private static readonly ConcurrentDictionary<string, List<Guid>> rooms = new ConcurrentDictionary<string, List<Guid>>();
+        public readonly ConcurrentDictionary<Guid, Tuple<string, SessionModel>> SessionToConnection = new ConcurrentDictionary<Guid, Tuple<string, SessionModel>>();
+        // item1 = leechers
+        // item2 = seeders
+        public readonly ConcurrentDictionary<string,  Tuple<List<Guid>, List<Guid>>> Torrents = new ConcurrentDictionary<string, Tuple<List<Guid>, List<Guid>>>();
 
         #endregion
 
-        #region Room Methods
+        #region Torrent Methods
 
         /// <summary>
-        /// Creates a session on the Room object and joins the user to that session.
+        /// Creates a session on the Torrent object and joins the user to that session.
         /// </summary>
-        public void JoinRoom(SessionModel session)
+        public void JoinTorrent(SessionModel session)
         {
             // Store everything in the cache
-            lock (sessionToConnection)
+            lock (SessionToConnection)
             {
-                sessionToConnection[session.SessionId] = Tuple.Create(Context.ConnectionId, session);
+                SessionToConnection[session.SessionId] = Tuple.Create(Context.ConnectionId, session);
             }
-            lock (rooms)
+            lock (Torrents)
             {
-                if (!rooms.ContainsKey(session.RoomId))
-                    rooms[session.RoomId] = new List<Guid>();
-                rooms[session.RoomId].Add(session.SessionId);
+                if (!Torrents.ContainsKey(session.TorrentId))
+                    Torrents[session.TorrentId] = Tuple.Create(new List<Guid>(), new List<Guid>());
+                Torrents[session.TorrentId].Item1.Add(session.SessionId);
             }
 
-            NotifyRoom(session.SessionId, (cs, roomId) => cs.onJoinedRoom(session), session.RoomId);
+            NotifyTorrent(session.SessionId, (cs, torrentId) => cs.onJoinedTorrent(session), session.TorrentId);
         }
 
         /// <summary>
-        /// Unregisters a user from the room in question.  
+        /// Unregisters a user from the torrent in question.  
         /// </summary>
-        /// <remarks>No exception is thrown if the room or session does not exist.</remarks>
-        /// <param name="sessionId">The sessionId to be removed from the room.</param>
-        public void LeaveRoom(Guid sessionId)
+        /// <remarks>No exception is thrown if the torrent or session does not exist.</remarks>
+        /// <param name="sessionId">The sessionId to be removed from the torrent.</param>
+        public void LeaveTorrent(Guid sessionId)
         {
-            NotifyRoom(sessionId, (cs, roomId) => cs.onLeftRoom(new SessionModel { SessionId = sessionId, RoomId = roomId }));
+            NotifyTorrent(sessionId, (cs, torrentId) => cs.onLeftTorrent(new SessionModel { SessionId = sessionId, TorrentId = torrentId }));
 
             // Remove the communication session from the cache.
-            lock (sessionToConnection)
+            lock (SessionToConnection)
             {
                 Tuple<string, SessionModel> connection;
-                if (sessionToConnection.TryGetValue(sessionId, out connection))
+                if (SessionToConnection.TryGetValue(sessionId, out connection))
                 {
                     Tuple<string, SessionModel> oldconnection;
-                    sessionToConnection.TryRemove(sessionId, out oldconnection);
+                    SessionToConnection.TryRemove(sessionId, out oldconnection);
                 }
             }
-            lock (rooms)
+            lock (Torrents)
             {
-                foreach (var room in rooms)
+                foreach (var torrent in Torrents)
                 {
-                    List<Guid> oldRoom;
-                    room.Value.Remove(sessionId);
-                    if (!room.Value.Any())
-                        rooms.TryRemove(room.Key, out oldRoom);
+                    Tuple<List<Guid>, List<Guid>> oldTorrent;
+                    torrent.Value.Item1.Remove(sessionId);
+                    torrent.Value.Item2.Remove(sessionId);
+                    if (!torrent.Value.Item1.Any() && !torrent.Value.Item2.Any())
+                        Torrents.TryRemove(torrent.Key, out oldTorrent);
                 }
             }
         }
@@ -101,10 +104,10 @@ namespace RTCTorrent.UI.Hubs
         {
             try
             {
-                var sessionId = sessionToConnection.FirstOrDefault(kvp => kvp.Value.Item1 == Context.ConnectionId).Key;
+                var sessionId = SessionToConnection.FirstOrDefault(kvp => kvp.Value.Item1 == Context.ConnectionId).Key;
                 if (sessionId != default(Guid))
                 {
-                    LeaveRoom(sessionId);
+                    LeaveTorrent(sessionId);
                 }
             }
             catch (Exception ex)
@@ -125,7 +128,7 @@ namespace RTCTorrent.UI.Hubs
         public void JsepOffer(SignalStateModel signalMessage)
         {
             Debug.WriteLine("Client making JSEP offer");
-            SendMessage(signalMessage.ToSessionId, (cs, roomId) => cs.onJsepOffer(signalMessage));
+            SendMessage(signalMessage.ToSessionId, (cs, torrentId) => cs.onJsepOffer(signalMessage));
         }
 
         /// <summary>
@@ -135,7 +138,7 @@ namespace RTCTorrent.UI.Hubs
         public void JsepAnswer(SignalStateModel signalMessage)
         {
             Debug.WriteLine("Client making JSEP answer");
-            SendMessage(signalMessage.ToSessionId, (cs, roomId) => cs.onJsepAnswer(signalMessage));
+            SendMessage(signalMessage.ToSessionId, (cs, torrentId) => cs.onJsepAnswer(signalMessage));
         }
 
         /// <summary>
@@ -148,27 +151,33 @@ namespace RTCTorrent.UI.Hubs
         public void JsepCandidate(SignalStateModel candidateMessage)
         {
             Debug.WriteLine("Client proposing JSEP ICE candidate");
-            SendMessage(candidateMessage.ToSessionId, (cs, roomId) => cs.onJsepCandidate(candidateMessage));
+            SendMessage(candidateMessage.ToSessionId, (cs, torrentId) => cs.onJsepCandidate(candidateMessage));
         }
 
         #endregion
 
         #region Utility methods
 
-        private static void NotifyRoom(Guid sessionId, Action<dynamic, string> action, string roomId = default(string))
+        private void NotifyTorrent(Guid sessionId, Action<dynamic, string> action, string torrentId = default(string))
         {
             try
             {
-                if (roomId == default(string))
+                if (torrentId == default(string))
                 {
-                    foreach (var room in rooms)
+                    foreach (var torrent in Torrents)
                     {
-                        NotifyClients(sessionId, room.Value.Where(e => e != sessionId).ToList(), room.Key, action);
+                        var leechers = torrent.Value.Item1.Where(e => e != sessionId);
+                        var seeders = torrent.Value.Item2.Where(e => e != sessionId);
+                        var allUsers = leechers.Concat(seeders);
+                        NotifyClients(sessionId, allUsers.ToList(), torrent.Key, action);
                     }
                 }
                 else
                 {
-                    NotifyClients(sessionId, rooms[roomId].Where(e => e != sessionId).ToList(), roomId, action);
+                    var leechers = Torrents[torrentId].Item1.Where(e => e != sessionId);
+                    var seeders = Torrents[torrentId].Item2.Where(e => e != sessionId);
+                    var allUsers = leechers.Concat(seeders);
+                    NotifyClients(sessionId, allUsers.ToList(), torrentId, action);
                 }
             }
             catch (Exception ex)
@@ -184,15 +193,15 @@ namespace RTCTorrent.UI.Hubs
         /// <param name="sessionId">Sender session Id</param>
         /// <param name="sessionsIds">Reciever session Ids</param>
         /// <param name="action">Delegate of action</param>
-        /// <param name="roomId">Reciever room Id</param>
-        private static void NotifyClients(Guid sessionId, List<Guid> sessionsIds, string roomId, Action<dynamic, string> action)
+        /// <param name="torrentId">Reciever torrent Id</param>
+        private void NotifyClients(Guid sessionId, List<Guid> sessionsIds, string torrentId, Action<dynamic, string> action)
         {
             try
             {
                 Debug.WriteLine("Received request to notify {0} participants about an update to session {1}.", sessionsIds.Count(), sessionId);
                 foreach (var session in sessionsIds)
                 {
-                    SendMessage(session, action, roomId);
+                    SendMessage(session, action, torrentId);
                 }
             }
             catch (Exception ex)
@@ -202,22 +211,22 @@ namespace RTCTorrent.UI.Hubs
             }
         }
 
-        private static void SendMessage(Guid sessionId, Action<dynamic, string> action, string roomId = default (string))
+        private void SendMessage(Guid sessionId, Action<dynamic, string> action, string torrentId = default (string))
         {
-            SendMessageToSession(sessionId, action, roomId);
+            SendMessageToSession(sessionId, action, torrentId);
         }
 
-        private static void SendMessageToSession(Guid sessionId, Action<dynamic, string> action, string roomId = default (string))
+        private void SendMessageToSession(Guid sessionId, Action<dynamic, string> action, string torrentId = default (string))
         {
-            var context = GlobalHost.ConnectionManager.GetHubContext<RoomHub>();
+            var context = GlobalHost.ConnectionManager.GetHubContext<TorrentHub>();
             Tuple<string, SessionModel> connection;
-            if (sessionToConnection.TryGetValue(sessionId, out connection))
+            if (SessionToConnection.TryGetValue(sessionId, out connection))
             {
                 try
                 {
                     Debug.WriteLine("Sending message to client session {0} associated with comm session {1}", sessionId, connection.Item1);
 
-                    action(context.Clients.Client(connection.Item1), roomId);
+                    action(context.Clients.Client(connection.Item1), torrentId);
                 }
                 catch (Exception ex)
                 {
