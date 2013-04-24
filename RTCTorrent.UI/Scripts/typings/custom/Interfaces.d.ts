@@ -58,6 +58,7 @@ interface IConfiguration {
     webRTCSupport: bool;
     setRemoteDescription: (handleConnection: () => void , localId: string, remoteId: string, pc: RTCPeerConnection, message: any) => void;
     addIceCandidate: (pc: RTCPeerConnection, message: any) => void;
+    pieceSize: number;
 }
 
 interface IClient extends IUser {
@@ -100,4 +101,7 @@ interface IPeer extends IUser {
 }
 
 interface IFileContent {
+}
+
+interface IFilePiece {
 }

@@ -14,7 +14,7 @@ module RtcTorrent {
         public files: KnockoutObservableArray;
         public readyToServe: KnockoutObservableBool;
         public fs: any = null;
-        public size: KnockoutObservableNumber; // 1024 * 1024 /*1MB*/
+        public size: KnockoutObservableNumber;
         constructor(id: string, name: string, size: number, client: IClient) {
             this.client = client;
             this.id = ko.observable(id);
