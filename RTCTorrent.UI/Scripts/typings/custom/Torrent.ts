@@ -55,27 +55,29 @@ module RtcTorrent {
             _this.client.configuration.requestFileSystem(window.PERSISTENT, _this.size, function (fs) {
                 _this.fs = fs;
                 _this.fs.root.getDirectory(_this.id(), {}, function (dirEntry) {
-                    var dirReader = dirEntry.createReader();
-                    var readEntries = function () {
-                        dirReader.readEntries(function (results) {
-                            if (!results.length) {
-                                _this.readyToServe(true);
-                            } else {
-                                for (var i = 0; i < results.length; i++) {
-                                    var entry = results[i];
-                                    if (entry.isDirectory) {
-                                        console.log('Directory: ' + entry.fullPath);
-                                    }
-                                    else if (entry.isFile) {
-                                        console.log('File: ' + entry.fullPath);
-                                        _this.files.push(new FileContent(_this, entry));
-                                    }
-                                }
-                                readEntries();
-                            }
-                        }, function (e) { console.log('readEntries error', e) });
-                    };
-                    readEntries();
+                    var reader = dirEntry.createReader();
+                    for (var file in _this.files())
+                        _this.files.push(new FileContent(_this, reader, file));
+                    //var readEntries = function () {
+                    //    reader.readEntries(function (results) {
+                    //        if (!results.length) {
+                    //            _this.readyToServe(true);
+                    //        } else {
+                    //            for (var i = 0; i < results.length; i++) {
+                    //                var entry = results[i];
+                    //                if (entry.isDirectory) {
+                    //                    console.log('Directory: ' + entry.fullPath);
+                    //                }
+                    //                else if (entry.isFile) {
+                    //                    console.log('File: ' + entry.fullPath);
+                    //                    _this.files.push(new FileContent(_this, entry));
+                    //                }
+                    //            }
+                    //            readEntries();
+                    //        }
+                    //    }, function (e) { console.log('readEntries error', e) });
+                    //};
+                    //readEntries();
                 }, function (e) { console.log('getDictionary error', e) });
             }, _this.quotaError);
         }

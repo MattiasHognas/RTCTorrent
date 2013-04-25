@@ -260,13 +260,6 @@
     <Content Include="Scripts\typings\custom\FileContent.min.js">
       <DependentUpon>FileContent.ts</DependentUpon>
     </Content>
-    <TypeScriptCompile Include="Scripts\typings\custom\FilePiece.ts" />
-    <Content Include="Scripts\typings\custom\FilePiece.js">
-      <DependentUpon>FilePiece.ts</DependentUpon>
-    </Content>
-    <Content Include="Scripts\typings\custom\FilePiece.min.js">
-      <DependentUpon>FilePiece.ts</DependentUpon>
-    </Content>
     <Content Include="Scripts\typings\custom\Interfaces.d.ts" />
     <Content Include="Scripts\typings\custom\Peer.js">
       <DependentUpon>Peer.ts</DependentUpon>
