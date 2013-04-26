@@ -23,19 +23,19 @@ module RtcTorrent {
             this.torrents = ko.observableArray([]);
             this.trackerFiles = ko.observableArray([]);
             this.configuration = new Configuration();
-            this.loadTorrent = function(trackerTorrent: any) {
+            this.loadTorrent = function(trackerTorrent: ITrackerTorrent) {
                 console.log('Loading torrent', trackerTorrent);
                 if (_this.sessionReady()) {
-                    var torrent: ITorrent = new Torrent(trackerTorrent.id, trackerTorrent.name, trackerTorrent.size, _this);
+                    var torrent: ITorrent = new Torrent(_this, trackerTorrent);
                     _this.torrents.push(torrent);
-                    _this.socket.server.joinTorrent({ SessionId: _this.id(), TorrentId: torrent.id() });
+                    _this.socket.server.joinTorrent({ SessionId: _this.id(), TorrentId: torrent.trackerTorrent.id() });
                 }
             };
             this.removeTorrent = function(trackerTorrent: any) {
                 console.log('Removing torrent', trackerTorrent);
                 var torrent: ITorrent = _this.findTorrent(trackerTorrent.id);
                 if (torrent) {
-                    _this.socket.server.leaveTorrent({ SessionId: _this.id(), TorrentId: torrent.id() });
+                    _this.socket.server.leaveTorrent({ SessionId: _this.id(), TorrentId: torrent.trackerTorrent.id() });
                     _this.torrents.remove(torrent);
                 }
             };
@@ -95,7 +95,7 @@ module RtcTorrent {
         }
         removePeer(id: string, torrentId: string) {
             var torrent: ITorrent = ko.utils.arrayFirst(this.torrents(), function (torrent: ITorrent) {
-                return torrentId === torrent.id();
+                return torrentId === torrent.trackerTorrent.id();
             });
             if (torrent) {
                 var peer: IPeer = torrent.findPeer(id);
@@ -106,7 +106,7 @@ module RtcTorrent {
         }
         findTorrent(torrentId: string) {
             var match: ITorrent = ko.utils.arrayFirst(this.torrents(), function (torrent: ITorrent) {
-                return torrentId === torrent.id();
+                return torrentId === torrent.trackerTorrent.id();
             });
             return match;
         }

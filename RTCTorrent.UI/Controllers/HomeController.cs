@@ -12,18 +12,26 @@ namespace RTCTorrent.UI.Controllers
             var torrents = new List<TorrentModel>();
             // TODO: This is an example, list from uploaded torrents
             const string id = "6D80D046-6E45-4DBE-97D5-541FBCBB2E78";
-            var files = new List<string>
+            var files = new List<TorrentModelFile>();
+            var totalSize = (1024*1024)*100;
+            files.Add(new TorrentModelFile
             {
-                "practical-performance-profiling-webinar.wmv"
-            };
+                FullPath = "testfile1.jpg",
+                Size = (totalSize / 4) * 1
+            });
+            files.Add(new TorrentModelFile
+            {
+                FullPath = "testfile2.jpg",
+                Size = (totalSize / 4) * 3
+            });
             var torrent = new TorrentModel
             {
                 Id = id,
-                Name = "Practical Performance Profiling Webinar",
+                Name = "Test",
                 Files = files,
                 Leechers = TorrentHub.Instance.Torrents.ContainsKey(id) ? TorrentHub.Instance.Torrents[id].Item1.Count : 0,
                 Seeders = TorrentHub.Instance.Torrents.ContainsKey(id) ? TorrentHub.Instance.Torrents[id].Item2.Count : 0,
-                Size = 1000000,
+                Size = totalSize,
             };
             torrents.Add(torrent);
             return View(torrents);

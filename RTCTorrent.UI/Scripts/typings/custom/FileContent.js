@@ -2,10 +2,15 @@ var RtcTorrent;
 (function (RtcTorrent) {
     'use strict';
     var FileContent = (function () {
-        function FileContent(torrent, reader, file) {
+        function FileContent(torrent, reader, fullPath, size) {
             this.torrent = torrent;
             this.reader = reader;
-            this.file = file;
+            this.fullPath = fullPath;
+            this.size = size;
+            this.pieces = new Array();
+            for(var i = 0; i < Math.ceil(size / this.torrent.client.configuration.pieceSize); i++) {
+                this.pieces.push(false);
+            }
         }
         FileContent.prototype.reportPiece = function (startByte, stopByte) {
         };
@@ -14,7 +19,7 @@ var RtcTorrent;
         FileContent.prototype.writePiece = function (data, startByte) {
             var _this = this;
             try  {
-                this.torrent.fs.root.getFile(this.file, {
+                this.torrent.fs.root.getFile(this.fullPath, {
                     create: false,
                     exclusive: false
                 }, function (entry) {
@@ -27,16 +32,17 @@ var RtcTorrent;
             }
         };
         FileContent.prototype.write = function (data, startByte, entry) {
-            var size = entry.size;
+            var currentSize = entry.size;
             var byteArray = new Uint8Array(data.length);
             for(var i = 0; i < data.length; i++) {
                 byteArray[i] = data.charCodeAt(i) & 0xff;
             }
-            var blobBuilder = null;
+            var blobBuilder = new this.torrent.client.configuration.blobBuilder();
             blobBuilder.append(byteArray.buffer);
             var fw = entry.createWriter();
-            if(size < startByte + data.length) {
-                fw.truncate(startByte + data.length);
+            var minSize = startByte + data.length;
+            if(currentSize < minSize) {
+                fw.truncate(minSize);
             }
             fw.seek(startByte);
             fw.write(blobBuilder.getBlob());

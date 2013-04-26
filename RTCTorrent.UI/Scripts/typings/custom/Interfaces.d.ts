@@ -5,9 +5,12 @@ declare var Bencode: any;
 
 interface Window {
     PERSISTENT: any;
+    mozRequestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
+    mozBlobBuilder: () => any;
+    mozStorageInfo: storageInfo;
     webkitStorageInfo: storageInfo;
     webkitRequestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
-    mozRequestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
+    webkitBlobBuilder: () => any;
 }
 
 interface ProgressEvent {
@@ -36,8 +39,8 @@ interface Navigator {
 }
 
 interface Window {
-    webkitRTCPeerConnection: (pcConfig: RTCPeerConnectionConfig, pcConstraints: MediaConstraints) => any;
     mozRTCPeerConnection: (pcConfig: RTCPeerConnectionConfig, pcConstraints: MediaConstraints) => any;
+    webkitRTCPeerConnection: (pcConfig: RTCPeerConnectionConfig, pcConstraints: MediaConstraints) => any;
     webkitSpeechRecognition(): any;
 }
 
@@ -50,6 +53,7 @@ interface RTCPeerConnection {
 }
 
 interface IConfiguration {
+    blobBuilder: () => any;
     requestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) => void;
     createPeerConnection: (handleConnection: () => void ) => RTCPeerConnection;
     getUserMedia: (constraints: MediaStreamConstraints, successCallback: (stream: LocalMediaStream) => void , errorCallback: (error: Error) => void ) => any;
@@ -59,6 +63,7 @@ interface IConfiguration {
     setRemoteDescription: (handleConnection: () => void , localId: string, remoteId: string, pc: RTCPeerConnection, message: any) => void;
     addIceCandidate: (pc: RTCPeerConnection, message: any) => void;
     pieceSize: number;
+    requestQuota: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
 }
 
 interface IClient extends IUser {
@@ -75,11 +80,23 @@ interface IUser {
     id: KnockoutObservableString;
 }
 
-interface ITorrent {
-    client: IClient;
+interface ITrackerTorrent {
     id: KnockoutObservableString;
     name: KnockoutObservableString;
     size: KnockoutObservableNumber;
+    seeders: KnockoutObservableNumber;
+    leechers: KnockoutObservableNumber;
+    files: KnockoutObservableArray;
+}
+
+interface ITrackerTorrentFile {
+    fullPath: KnockoutObservableString;
+    size: KnockoutObservableNumber;
+}
+
+interface ITorrent {
+    client: IClient;
+    trackerTorrent: ITrackerTorrent;
     peers: KnockoutObservableArray;
     files: KnockoutObservableArray;
     readyToServe: KnockoutObservableBool;
@@ -101,7 +118,9 @@ interface IPeer extends IUser {
 }
 
 interface IFileContent {
-}
-
-interface IFilePiece {
+    torrent: ITorrent;
+    reader: any;
+    fullPath: string;
+    size: number;
+    pieces: bool[];
 }

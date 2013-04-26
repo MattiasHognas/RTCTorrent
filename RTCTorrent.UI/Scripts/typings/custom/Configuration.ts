@@ -6,6 +6,8 @@
 module RtcTorrent {
     'use strict';
     export class Configuration implements IConfiguration {
+        public requestQuota: (type: any, byteSize: number, quotaGranted: (availableBytes) => void , quotaError: (availableBytes) => void) => void;
+        public blobBuilder: () => any;
         public requestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) => void;
         public createPeerConnection: (handleConnection: () => void ) => RTCPeerConnection;
         public getUserMedia: (constraints: MediaStreamConstraints, successCallback: (stream: LocalMediaStream) => void , errorCallback: (error: Error) => void ) => any;
@@ -37,6 +39,12 @@ module RtcTorrent {
                 ]
             };
             if (navigator.mozGetUserMedia) {
+                this.requestQuota = function (type: any, byteSize: number, quotaGranted: (availableBytes) => void , quotaError: (availableBytes) => void) {
+                    return window.mozStorageInfo.requestQuota(type, byteSize, quotaGranted, quotaError);
+                }
+                this.blobBuilder = function () {
+                    return new window.mozBlobBuilder();
+                }
                 this.requestFileSystem = function (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) {
                     return window.mozRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
                 };
@@ -82,6 +90,12 @@ module RtcTorrent {
                     pc.addIceCandidate(candidate);
                 }
             } else if (navigator.webkitGetUserMedia) {
+                this.requestQuota = function (type: any, byteSize: number, quotaGranted: (availableBytes) => void , quotaError: (availableBytes) => void ) {
+                    return window.webkitStorageInfo.requestQuota(type, byteSize, quotaGranted, quotaError);
+                }
+                this.blobBuilder = function () {
+                    return new window.webkitBlobBuilder();
+                }
                 this.requestFileSystem = function (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) {
                     return window.webkitRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
                 };

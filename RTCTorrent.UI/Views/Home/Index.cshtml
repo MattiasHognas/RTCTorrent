@@ -1,4 +1,6 @@
-﻿@model List<RTCTorrent.UI.Models.TorrentModel>
+﻿@using System.Web.Script.Serialization
+@using Newtonsoft.Json
+@model List<RTCTorrent.UI.Models.TorrentModel>
 
 @{
     ViewBag.Title = "RtcTorrent";
@@ -20,15 +22,8 @@
         @* TODO: handle this with ajax requests on the listing of "torrents" *@
         @foreach (var item in Model)
         {
-            <text>client.trackerFiles.push(
-            {
-                id: '@item.Id',
-                name: '@item.Name',
-                seeders: '@item.Seeders',
-                leechers: '@item.Leechers',
-                size: '@item.Size',
-                files: ['@string.Join("','", item.Files)']
-            });</text>
+            var json = JsonConvert.SerializeObject(item.Files);
+            <text>client.trackerFiles.push(new RtcTorrent.TrackerTorrent('@item.Id', '@item.Name', @item.Seeders, @item.Leechers, @item.Size, @Html.Raw(json)));</text>
         }
     </script>
 }
@@ -37,14 +32,14 @@
 <div>
     <!-- ko foreach: torrents()-->
     <div>
-        <div data-bind="text: $data.name()"></div>
+        <div data-bind="text: trackerTorrent.name"></div>
         <div>Peers</div>
-        <ul data-bind="foreach: peers()">
-            <li data-bind="text: $data.id()"></li>
+        <ul data-bind="foreach: $data.peers()">
+            <li data-bind="text: id"></li>
         </ul>
         <div>Torrents</div>
         <ul data-bind="foreach: files()">
-            <li data-bind="text: $data"></li>
+            <li data-bind="text: fullPath"></li>
         </ul>
     </div>
     <!-- /ko -->​

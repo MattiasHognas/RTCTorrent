@@ -151,6 +151,7 @@
     <Compile Include="Hubs\TorrentHub.cs" />
     <Compile Include="Models\SessionModel.cs" />
     <Compile Include="Models\SignalStateModel.cs" />
+    <Compile Include="Models\TorrentModelFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

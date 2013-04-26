@@ -47,7 +47,7 @@ module RtcTorrent {
                 this.torrent.client.socket.server.jsepCandidate({
                     FromSessionId: this.torrent.client.id(),
                     ToSessionId: this.id(),
-                    TorrentId: this.torrent.id(),
+                    TorrentId: this.torrent.trackerTorrent.id(),
                     Message: JSON.stringify({
                         label: event.candidate.sdpMLineIndex,
                         id: event.candidate.sdpMid,
@@ -64,7 +64,7 @@ module RtcTorrent {
             this.pc.createOffer(function (sessionDescription) {
                 console.log('setting local description');
                 _this.pc.setLocalDescription(sessionDescription);
-                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), TorrentId: _this.torrent.id(), Message: JSON.stringify(sessionDescription) };
+                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), TorrentId: _this.torrent.trackerTorrent.id(), Message: JSON.stringify(sessionDescription) };
                 console.log('sending offer', message);
                 _this.torrent.client.socket.server.jsepOffer(message);
             }, null, _this.mediaConstraints);
@@ -75,7 +75,7 @@ module RtcTorrent {
             this.pc.createAnswer(function (sessionDescription) {
                 console.log('setting local description');
                 _this.pc.setLocalDescription(sessionDescription);
-                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), TorrentId: _this.torrent.id(), Message: JSON.stringify(sessionDescription) };
+                var message = { FromSessionId: _this.torrent.client.id(), ToSessionId: _this.id(), TorrentId: _this.torrent.trackerTorrent.id(), Message: JSON.stringify(sessionDescription) };
                 console.log('sending answer', message);
                 _this.torrent.client.socket.server.jsepAnswer(message);
             }, null, _this.mediaConstraints);

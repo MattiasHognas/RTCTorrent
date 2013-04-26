@@ -20,11 +20,11 @@ var RtcTorrent;
             this.loadTorrent = function (trackerTorrent) {
                 console.log('Loading torrent', trackerTorrent);
                 if(_this.sessionReady()) {
-                    var torrent = new RtcTorrent.Torrent(trackerTorrent.id, trackerTorrent.name, trackerTorrent.size, _this);
+                    var torrent = new RtcTorrent.Torrent(_this, trackerTorrent);
                     _this.torrents.push(torrent);
                     _this.socket.server.joinTorrent({
                         SessionId: _this.id(),
-                        TorrentId: torrent.id()
+                        TorrentId: torrent.trackerTorrent.id()
                     });
                 }
             };
@@ -34,7 +34,7 @@ var RtcTorrent;
                 if(torrent) {
                     _this.socket.server.leaveTorrent({
                         SessionId: _this.id(),
-                        TorrentId: torrent.id()
+                        TorrentId: torrent.trackerTorrent.id()
                     });
                     _this.torrents.remove(torrent);
                 }
@@ -94,7 +94,7 @@ var RtcTorrent;
         };
         Client.prototype.removePeer = function (id, torrentId) {
             var torrent = ko.utils.arrayFirst(this.torrents(), function (torrent) {
-                return torrentId === torrent.id();
+                return torrentId === torrent.trackerTorrent.id();
             });
             if(torrent) {
                 var peer = torrent.findPeer(id);
@@ -105,7 +105,7 @@ var RtcTorrent;
         };
         Client.prototype.findTorrent = function (torrentId) {
             var match = ko.utils.arrayFirst(this.torrents(), function (torrent) {
-                return torrentId === torrent.id();
+                return torrentId === torrent.trackerTorrent.id();
             });
             return match;
         };

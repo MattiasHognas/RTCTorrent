@@ -25,6 +25,12 @@ var RtcTorrent;
                 ]
             };
             if(navigator.mozGetUserMedia) {
+                this.requestQuota = function (type, byteSize, quotaGranted, quotaError) {
+                    return window.mozStorageInfo.requestQuota(type, byteSize, quotaGranted, quotaError);
+                };
+                this.blobBuilder = function () {
+                    return new window.mozBlobBuilder();
+                };
                 this.requestFileSystem = function (type, grantedBytes, quotaGranted, quotaError) {
                     return window.mozRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
                 };
@@ -70,6 +76,12 @@ var RtcTorrent;
                     pc.addIceCandidate(candidate);
                 };
             } else if(navigator.webkitGetUserMedia) {
+                this.requestQuota = function (type, byteSize, quotaGranted, quotaError) {
+                    return window.webkitStorageInfo.requestQuota(type, byteSize, quotaGranted, quotaError);
+                };
+                this.blobBuilder = function () {
+                    return new window.webkitBlobBuilder();
+                };
                 this.requestFileSystem = function (type, grantedBytes, quotaGranted, quotaError) {
                     return window.webkitRequestFileSystem(type, grantedBytes, quotaGranted, quotaError);
                 };

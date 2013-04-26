@@ -44,7 +44,7 @@ var RtcTorrent;
                 this.torrent.client.socket.server.jsepCandidate({
                     FromSessionId: this.torrent.client.id(),
                     ToSessionId: this.id(),
-                    TorrentId: this.torrent.id(),
+                    TorrentId: this.torrent.trackerTorrent.id(),
                     Message: JSON.stringify({
                         label: event.candidate.sdpMLineIndex,
                         id: event.candidate.sdpMid,
@@ -64,7 +64,7 @@ var RtcTorrent;
                 var message = {
                     FromSessionId: _this.torrent.client.id(),
                     ToSessionId: _this.id(),
-                    TorrentId: _this.torrent.id(),
+                    TorrentId: _this.torrent.trackerTorrent.id(),
                     Message: JSON.stringify(sessionDescription)
                 };
                 console.log('sending offer', message);
@@ -80,7 +80,7 @@ var RtcTorrent;
                 var message = {
                     FromSessionId: _this.torrent.client.id(),
                     ToSessionId: _this.id(),
-                    TorrentId: _this.torrent.id(),
+                    TorrentId: _this.torrent.trackerTorrent.id(),
                     Message: JSON.stringify(sessionDescription)
                 };
                 console.log('sending answer', message);
