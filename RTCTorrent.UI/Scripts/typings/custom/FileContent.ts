@@ -7,26 +7,27 @@ module RtcTorrent {
         public reader: any;
         public fullPath: string;
         public size: number;
-        public pieces: bool[];
-        constructor(torrent: ITorrent, reader: any, fullPath: string, size: number)
+        public hashes: string[];
+        constructor(torrent: ITorrent, reader: any, fullPath: string, size: number, hashes: string[])
         {
             this.torrent = torrent;
             this.reader = reader;
             this.fullPath = fullPath;
             this.size = size;
-            this.pieces = new bool[];
-            for (var i = 0; i < Math.ceil(size / this.torrent.client.configuration.pieceSize); i++)
-                this.pieces.push(false);
-            // TODO: call requestPiece for each piece that is false in this.pieces
+            this.hashes = hashes;
+            // TODO: Read pieces of file on disk if exists and piece start position <= size.
+            // TODO: Add SHA1 library.
+            // TODO: Where SHA1.hex(str) != to the corresponding this.hashes piece: call requestPiece
         }
         reportPiece(startByte: number, stopByte: number) {
-            // TODO: Send if current piece exists to torrent channel
+            // TODO: Send info on current piece existance to the torrent channel
             // TODO: Go trough ITorrent to evaluate seeding / leeching / %
         }
         requestPiece() {
-            // TODO: Request missing pieces from torrent listeners in channel
+            // TODO: Request piece from torrent listeners in channel
         }
-        // TODO: call from ITorrent
+        // TODO: Call from ITorrent
+        // TODO: When got full piece, call reportPiece
         writePiece(data: string, startByte: number) {
             var _this = this;
             try {

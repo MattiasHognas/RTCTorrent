@@ -13,16 +13,18 @@ namespace RTCTorrent.UI.Controllers
             // TODO: This is an example, list from uploaded torrents
             const string id = "6D80D046-6E45-4DBE-97D5-541FBCBB2E78";
             var files = new List<TorrentModelFile>();
-            var totalSize = (1024*1024)*100;
+            const int totalSize = (1024 * 1024) * 100; // 100 Mb
             files.Add(new TorrentModelFile
             {
                 FullPath = "testfile1.jpg",
-                Size = (totalSize / 4) * 1
+                Size = (totalSize / 4) * 1,
+                Hashes = new List<string> { "absdefgh", "ijlmnop" }
             });
             files.Add(new TorrentModelFile
             {
                 FullPath = "testfile2.jpg",
-                Size = (totalSize / 4) * 3
+                Size = (totalSize / 4) * 3,
+                Hashes = new List<string> {"absdefgh","ijlmnop"}
             });
             var torrent = new TorrentModel
             {

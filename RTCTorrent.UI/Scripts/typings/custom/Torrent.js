@@ -15,19 +15,19 @@ var RtcTorrent;
             this.seeders(seeders);
             this.leechers(leechers);
             this.size(size);
-            for(var i = 0; i < files.length; i++) {
-                this.files.push(new TrackerTorrentFile(files[i].fullPath, files[i].size));
-            }
+            var _this = this;
+            ko.utils.arrayForEach(files, function (file) {
+                _this.files.push(new TrackerTorrentFile(file.fullPath, file.size, file.hashes));
+            });
         }
         return TrackerTorrent;
     })();
     RtcTorrent.TrackerTorrent = TrackerTorrent;    
     var TrackerTorrentFile = (function () {
-        function TrackerTorrentFile(fullPath, size) {
-            this.fullPath = ko.observable();
-            this.size = ko.observable();
-            this.fullPath(fullPath);
-            this.size(size);
+        function TrackerTorrentFile(fullPath, size, hashes) {
+            this.fullPath = ko.observable(fullPath);
+            this.size = ko.observable(size);
+            this.hashes = ko.observableArray(hashes);
         }
         return TrackerTorrentFile;
     })();
@@ -81,7 +81,7 @@ var RtcTorrent;
                     }, function (dirEntry) {
                         var reader = dirEntry.createReader();
                         for(var i = 0; i < trackerTorrent.files().length; i++) {
-                            _this.files.push(new RtcTorrent.FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size()));
+                            _this.files.push(new RtcTorrent.FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].hashes()));
                         }
                     }, function (e) {
                         console.log('getDictionary error', e);

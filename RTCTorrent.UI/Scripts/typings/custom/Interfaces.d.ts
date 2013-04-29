@@ -92,6 +92,7 @@ interface ITrackerTorrent {
 interface ITrackerTorrentFile {
     fullPath: KnockoutObservableString;
     size: KnockoutObservableNumber;
+    hashes: KnockoutObservableArray;
 }
 
 interface ITorrent {
@@ -122,5 +123,5 @@ interface IFileContent {
     reader: any;
     fullPath: string;
     size: number;
-    pieces: bool[];
+    hashes: string[];
 }

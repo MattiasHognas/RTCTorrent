@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace RTCTorrent.UI.Models
@@ -12,5 +13,8 @@ namespace RTCTorrent.UI.Models
         [DataMember]
         [JsonProperty(PropertyName = "size")]
         public long Size { get; set; }
+        [DataMember]
+        [JsonProperty(PropertyName = "hashes")]
+        public List<string> Hashes { get; set; }
     }
 }

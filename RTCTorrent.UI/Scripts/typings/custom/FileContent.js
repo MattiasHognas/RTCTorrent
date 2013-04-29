@@ -2,15 +2,12 @@ var RtcTorrent;
 (function (RtcTorrent) {
     'use strict';
     var FileContent = (function () {
-        function FileContent(torrent, reader, fullPath, size) {
+        function FileContent(torrent, reader, fullPath, size, hashes) {
             this.torrent = torrent;
             this.reader = reader;
             this.fullPath = fullPath;
             this.size = size;
-            this.pieces = new Array();
-            for(var i = 0; i < Math.ceil(size / this.torrent.client.configuration.pieceSize); i++) {
-                this.pieces.push(false);
-            }
+            this.hashes = hashes;
         }
         FileContent.prototype.reportPiece = function (startByte, stopByte) {
         };
