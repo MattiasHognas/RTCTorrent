@@ -42,7 +42,7 @@ module RtcTorrent {
                 console.log('error', e);
             }
         }
-        // TODO: needs testing
+        // TODO: Needs alot of work..
         private write(data: string, startByte: number, entry: any) {
             var currentSize: number = entry.size;
             var byteArray: Uint8Array = new Uint8Array(data.length);
