@@ -69,6 +69,8 @@ module RtcTorrent {
             // TODO: Send info on current piece existance to the torrent channel (send to this.torrent.peers)
             // TODO: Go trough ITorrent to evaluate seeding / leeching / %
         }
+        // TODO: Implement libtorrents piece picker somehow
+        // https://code.google.com/p/libtorrent/source/browse/include/libtorrent/piece_picker.hpp?name=libtorrent_0_16_5
         requestPiece(startByte: number, stopByte: number) {
             console.log('requestPiece', startByte, stopByte);
             // TODO: Request piece from torrent listeners in channel (send to this.torrent.peers)
