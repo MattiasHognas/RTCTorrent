@@ -9,7 +9,6 @@ module RtcTorrent {
     export class User implements IUser {
         public id: KnockoutObservableString;
         constructor(id?: string) {
-            var _this = this;
             this.id = ko.observable(id);
         }
     }

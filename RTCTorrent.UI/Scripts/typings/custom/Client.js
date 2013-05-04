@@ -12,7 +12,6 @@ var RtcTorrent;
                 _super.call(this);
             this.configuration = null;
             this.socket = null;
-            var _this = this;
             this.sessionReady = ko.observable(false);
             this.torrents = ko.observableArray([]);
             this.trackerFiles = ko.observableArray([]);

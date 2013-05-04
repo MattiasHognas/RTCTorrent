@@ -16,9 +16,7 @@ module RtcTorrent {
         public webRTCSupport: bool = true;
         public setRemoteDescription: (handleConnection: () => void , localId: string, remoteId: string, pc: RTCPeerConnection, message: any) => void;
         public addIceCandidate: (pc: RTCPeerConnection, message: any) => void;
-        public pieceSize: number = 1024 * 1024; /*1MB*/
         constructor() {
-            var _this = this;
             var pcConfig: RTCPeerConnectionConfig = {
                 'iceServers': [
                     {

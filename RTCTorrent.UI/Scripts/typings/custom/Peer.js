@@ -93,7 +93,7 @@ var RtcTorrent;
         };
         Peer.prototype.addDataChannelEvents = function (channel) {
             console.log('addDataChannelEvents');
-            var _self = this;
+            var _this = this;
             this.channel = channel;
             this.channel.onmessage = function (event) {
                 if(event.data instanceof ArrayBuffer) {
@@ -106,11 +106,11 @@ var RtcTorrent;
             };
             this.channel.onopen = function (event) {
                 console.log('dataChannel onopen', event);
-                _self.channelOpened = true;
+                _this.channelOpened = true;
             };
             this.channel.onclose = function (event) {
                 console.log('dataChannel onclose', event);
-                _self.channelOpened = false;
+                _this.channelOpened = false;
             };
             this.channel.onerror = function (event) {
                 console.log('dataChannel onerror', event);

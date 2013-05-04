@@ -14,7 +14,7 @@ namespace RTCTorrent.UI.Models
         [JsonProperty(PropertyName = "size")]
         public long Size { get; set; }
         [DataMember]
-        [JsonProperty(PropertyName = "hashes")]
-        public List<string> Hashes { get; set; }
+        [JsonProperty(PropertyName = "pieces")]
+        public List<int> Pieces { get; set; }
     }
 }

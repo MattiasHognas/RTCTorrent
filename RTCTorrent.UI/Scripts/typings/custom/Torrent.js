@@ -2,36 +2,6 @@ var observableArray;
 var RtcTorrent;
 (function (RtcTorrent) {
     'use strict';
-    var TrackerTorrent = (function () {
-        function TrackerTorrent(id, name, seeders, leechers, size, files) {
-            this.id = ko.observable();
-            this.name = ko.observable();
-            this.size = ko.observable();
-            this.seeders = ko.observable();
-            this.leechers = ko.observable();
-            this.files = ko.observableArray();
-            this.id(id);
-            this.name(name);
-            this.seeders(seeders);
-            this.leechers(leechers);
-            this.size(size);
-            var _this = this;
-            ko.utils.arrayForEach(files, function (file) {
-                _this.files.push(new TrackerTorrentFile(file.fullPath, file.size, file.hashes));
-            });
-        }
-        return TrackerTorrent;
-    })();
-    RtcTorrent.TrackerTorrent = TrackerTorrent;    
-    var TrackerTorrentFile = (function () {
-        function TrackerTorrentFile(fullPath, size, hashes) {
-            this.fullPath = ko.observable(fullPath);
-            this.size = ko.observable(size);
-            this.hashes = ko.observableArray(hashes);
-        }
-        return TrackerTorrentFile;
-    })();
-    RtcTorrent.TrackerTorrentFile = TrackerTorrentFile;    
     var Torrent = (function () {
         function Torrent(client, trackerTorrent) {
             this.fs = null;
@@ -81,7 +51,7 @@ var RtcTorrent;
                     }, function (dirEntry) {
                         var reader = dirEntry.createReader();
                         for(var i = 0; i < trackerTorrent.files().length; i++) {
-                            _this.files.push(new RtcTorrent.FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].hashes()));
+                            _this.files.push(new RtcTorrent.FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].pieces()));
                         }
                     }, function (e) {
                         console.log('getDictionary error', e);

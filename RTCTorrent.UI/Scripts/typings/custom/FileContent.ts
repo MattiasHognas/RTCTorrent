@@ -7,55 +7,110 @@ module RtcTorrent {
         public reader: any;
         public fullPath: string;
         public size: number;
-        public hashes: string[];
-        constructor(torrent: ITorrent, reader: any, fullPath: string, size: number, hashes: string[])
+        public pieces: number[];
+        constructor(torrent: ITorrent, reader: any, fullPath: string, size: number, pieces: number[])
         {
             this.torrent = torrent;
             this.reader = reader;
             this.fullPath = fullPath;
             this.size = size;
-            this.hashes = hashes;
-            // TODO: Read pieces of file on disk if exists and piece start position <= size.
-            // TODO: Add SHA1 library.
-            // TODO: Where SHA1.hex(str) != to the corresponding this.hashes piece: call requestPiece
+            this.pieces = pieces;
+            this.index();
         }
-        reportPiece(startByte: number, stopByte: number) {
-            // TODO: Send info on current piece existance to the torrent channel
+        index() {
+            var _this: IFileContent = this;
+            _this.torrent.fs.root.getFile(_this.fullPath, { create: true, exclusive: false }, function (fileEntry) {
+                fileEntry.file(
+                    function (file) {
+                        fileEntry.createWriter(
+                            function (fileWriter) {
+                                fileWriter.onwriteend = function (e) {
+                                    fileWriter.onwriteend = null;
+                                    _this.loadPieces(file);
+                                };
+                                fileWriter.seek(file.size);
+                                if (file.size < _this.size)
+                                    fileWriter.truncate(_this.size);
+                                else
+                                    _this.loadPieces(file);
+                            },
+                            function (e) { console.log('error', e) });
+                    },
+                    function (e) { console.log('error', e) });
+            });
+        }
+        loadPieces(file: File) {
+            var _this: IFileContent = this;
+            var reader: FileReader = new FileReader();
+            reader.onloadend = function (evt) {
+                if (reader.readyState == 2) {
+                    var bytes: ArrayBuffer = reader.result;
+                    var currentByte: number = 1;
+                    // TODO: Check SHA1 hash? (Add hash to _this.pieces?)
+                    for (var i = 0; i < _this.pieces.length; i++) {
+                        var startByte = currentByte - 1;
+                        var stopByte = startByte + _this.pieces[i] - 1;
+                        var byte = bytes[startByte];
+                        if (byte === undefined) { // TODO: Shouldn't this be 0x00 as zerobyte?
+                            _this.requestPiece(startByte, stopByte);
+                        } else {
+                            _this.announcePiece(startByte, stopByte);
+                        }
+                        currentByte = stopByte + 2;
+                    }
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        announcePiece(startByte: number, stopByte: number) {
+            console.log('announcePiece', startByte, stopByte);
+            // TODO: Send info on current piece existance to the torrent channel (send to this.torrent.peers)
             // TODO: Go trough ITorrent to evaluate seeding / leeching / %
         }
-        requestPiece() {
-            // TODO: Request piece from torrent listeners in channel
+        requestPiece(startByte: number, stopByte: number) {
+            console.log('requestPiece', startByte, stopByte);
+            // TODO: Request piece from torrent listeners in channel (send to this.torrent.peers)
         }
         // TODO: Call from ITorrent
-        // TODO: When got full piece, call reportPiece
-        writePiece(data: string, startByte: number) {
-            var _this = this;
-            try {
-                this.torrent.fs.root.getFile(
-                    this.fullPath,
-                    {create: false, exclusive: false}, 
-                    function(entry) {
-                        _this.write(data, startByte, entry);
-                    }, 
-                    function(e) { console.log('error', e) });
-            } catch (e) {
-                console.log('error', e);
-            }
+        readPiece(startByte: string, stopByte: number, result: (result: ArrayBuffer) => void ) {
+            var _this: IFileContent = this;
+            _this.torrent.fs.root.getFile(_this.fullPath, { create: true, exclusive: false }, function (fileEntry) {
+                fileEntry.file(
+                    function (file) {
+                        var reader = new FileReader();
+                        reader.onloadend = function (evt) {
+                            if (reader.readyState == 2)
+                                result(reader.result);
+                        };
+                        var blob = file.slice(startByte, stopByte + 1);
+                        reader.readAsArrayBuffer(blob);
+                    },
+                    function (e) { console.log('error', e) });
+            });
         }
-        // TODO: Needs alot of work..
-        private write(data: string, startByte: number, entry: any) {
-            var currentSize: number = entry.size;
-            var byteArray: Uint8Array = new Uint8Array(data.length);
-            for (var i = 0; i < data.length; i++)
-                byteArray[i] = data.charCodeAt(i) & 0xff;
+        // TODO: Call from ITorrent
+        writePiece(data: ArrayBuffer, startByte: number) {
+            var _this: IFileContent = this;
+            _this.torrent.fs.root.getFile(
+                _this.fullPath,
+                { create: true, exclusive: false },
+                function (entry) {
+                    _this.write(data, startByte, entry)
+                },
+                function (e) { console.log('error', e) });
+        }
+        write(data: ArrayBuffer, startByte: number, fileEntry: any) {
+            var _this: IFileContent = this;
+            var currentSize: number = fileEntry.size;
             var blobBuilder = new this.torrent.client.configuration.blobBuilder();
-            blobBuilder.append(byteArray.buffer);
-            var fw = entry.createWriter();
-            var minSize: number = startByte + data.length;
-            if (currentSize < minSize)
-                fw.truncate(minSize);
-            fw.seek(startByte);
-            fw.write(blobBuilder.getBlob())
+            blobBuilder.append(data);
+            var fileWriter = fileEntry.createWriter();
+            fileWriter.onwriteend = function (e) {
+                fileWriter.onwriteend = null;
+                _this.announcePiece(startByte, startByte + data.byteLength)
+            }
+            fileWriter.seek(startByte);
+            fileWriter.write(blobBuilder.getBlob())
         }
     }
 }

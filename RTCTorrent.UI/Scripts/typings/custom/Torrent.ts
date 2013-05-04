@@ -8,40 +8,6 @@ var observableArray: any;
 
 module RtcTorrent {
     'use strict';
-    export class TrackerTorrent implements ITrackerTorrent {
-        public id: KnockoutObservableString = ko.observable();
-        public name: KnockoutObservableString = ko.observable();
-        public size: KnockoutObservableNumber = ko.observable();
-        public seeders: KnockoutObservableNumber = ko.observable();
-        public leechers: KnockoutObservableNumber = ko.observable();
-        public files: KnockoutObservableArray = ko.observableArray();
-        constructor(id: string,
-                    name: string,
-                    seeders: number,
-                    leechers: number,
-                    size: number,
-                    files: any) {
-            this.id(id);
-            this.name(name);
-            this.seeders(seeders);
-            this.leechers(leechers);
-            this.size(size);
-            var _this = this;
-            ko.utils.arrayForEach(files, function (file) {
-                _this.files.push(new TrackerTorrentFile(file.fullPath, file.size, file.hashes));
-            });
-        }
-    }
-    export class TrackerTorrentFile implements ITrackerTorrentFile {
-        public fullPath: KnockoutObservableString;
-        public hashes: KnockoutObservableArray;
-        public size: KnockoutObservableNumber;
-        constructor(fullPath: string, size: number, hashes: string[]) {
-            this.fullPath = ko.observable(fullPath);
-            this.size = ko.observable(size);
-            this.hashes = ko.observableArray(hashes);
-        }
-    }
     export class Torrent implements ITorrent {
         public client: IClient;
         public trackerTorrent: ITrackerTorrent;
@@ -58,7 +24,7 @@ module RtcTorrent {
             this.loadFiles(trackerTorrent);
             //TODO: Report to server when seeding/leeching
         }
-        private quotaError(e: any) {
+        quotaError(e: any) {
             var msg = '';
             switch (e.code) {
                 case 10:
@@ -86,7 +52,7 @@ module RtcTorrent {
             console.log('Error: ' + msg, e);
         }
         private loadFiles(trackerTorrent: ITrackerTorrent) {
-            var _this = this;
+            var _this: ITorrent = this;
             _this.client.configuration.requestQuota(window.PERSISTENT, trackerTorrent.size(), function (availableBytes) {
                 console.log("Quota is available. Quota size: " + availableBytes);
                 _this.client.configuration.requestFileSystem(window.PERSISTENT, _this.trackerTorrent.size(), function (fs) {
@@ -94,7 +60,7 @@ module RtcTorrent {
                     _this.fs.root.getDirectory(trackerTorrent.id(), { create: true }, function (dirEntry) {
                         var reader = dirEntry.createReader();
                         for (var i = 0; i < trackerTorrent.files().length; i++)
-                            _this.files.push(new FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].hashes()));
+                            _this.files.push(new FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].pieces()));
                     }, function (e) { console.log('getDictionary error', e) });
                 }, _this.quotaError);
             }, _this.quotaError);

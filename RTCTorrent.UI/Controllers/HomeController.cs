@@ -18,13 +18,13 @@ namespace RTCTorrent.UI.Controllers
             {
                 FullPath = "testfile1.jpg",
                 Size = (totalSize / 4) * 1,
-                Hashes = new List<string> { "absdefgh", "ijlmnop" }
+                Pieces = new List<int> { ((totalSize / 4) * 1) / 2, ((totalSize / 4) * 1) / 2 }
             });
             files.Add(new TorrentModelFile
             {
                 FullPath = "testfile2.jpg",
                 Size = (totalSize / 4) * 3,
-                Hashes = new List<string> {"absdefgh","ijlmnop"}
+                Pieces = new List<int> { ((totalSize / 4) * 3) / 2, ((totalSize / 4) * 3) / 2 }
             });
             var torrent = new TorrentModel
             {

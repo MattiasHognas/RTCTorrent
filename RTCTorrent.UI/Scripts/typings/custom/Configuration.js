@@ -4,8 +4,6 @@ var RtcTorrent;
     var Configuration = (function () {
         function Configuration() {
             this.webRTCSupport = true;
-            this.pieceSize = 1024 * 1024;
-            var _this = this;
             var pcConfig = {
                 'iceServers': [
                     {

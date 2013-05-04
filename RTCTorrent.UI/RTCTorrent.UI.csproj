@@ -268,18 +268,26 @@
     <Content Include="Scripts\typings\custom\Peer.min.js">
       <DependentUpon>Peer.ts</DependentUpon>
     </Content>
-    <Content Include="Scripts\typings\custom\Speech.js">
-      <DependentUpon>Speech.ts</DependentUpon>
-    </Content>
-    <Content Include="Scripts\typings\custom\Speech.min.js">
-      <DependentUpon>Speech.ts</DependentUpon>
-    </Content>
     <Content Include="Scripts\typings\custom\Torrent.js">
       <DependentUpon>Torrent.ts</DependentUpon>
       <SubType>Code</SubType>
     </Content>
     <Content Include="Scripts\typings\custom\Torrent.min.js">
       <DependentUpon>Torrent.ts</DependentUpon>
+    </Content>
+    <TypeScriptCompile Include="Scripts\typings\custom\TrackerTorrentFile.ts" />
+    <TypeScriptCompile Include="Scripts\typings\custom\TrackerTorrent.ts" />
+    <Content Include="Scripts\typings\custom\TrackerTorrent.js">
+      <DependentUpon>TrackerTorrent.ts</DependentUpon>
+    </Content>
+    <Content Include="Scripts\typings\custom\TrackerTorrent.min.js">
+      <DependentUpon>TrackerTorrent.ts</DependentUpon>
+    </Content>
+    <Content Include="Scripts\typings\custom\TrackerTorrentFile.js">
+      <DependentUpon>TrackerTorrentFile.ts</DependentUpon>
+    </Content>
+    <Content Include="Scripts\typings\custom\TrackerTorrentFile.min.js">
+      <DependentUpon>TrackerTorrentFile.ts</DependentUpon>
     </Content>
     <Content Include="Scripts\typings\custom\User.js">
       <DependentUpon>User.ts</DependentUpon>
@@ -317,7 +325,6 @@
     <TypeScriptCompile Include="Scripts\typings\custom\Configuration.ts" />
     <TypeScriptCompile Include="Scripts\typings\custom\FileContent.ts" />
     <TypeScriptCompile Include="Scripts\typings\custom\Peer.ts" />
-    <TypeScriptCompile Include="Scripts\typings\custom\Speech.ts" />
     <TypeScriptCompile Include="Scripts\typings\custom\Torrent.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

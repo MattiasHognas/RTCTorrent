@@ -18,7 +18,6 @@ module RtcTorrent {
         public socket: any = null;
         constructor() {
             super();
-            var _this = this;
             this.sessionReady = ko.observable(false);
             this.torrents = ko.observableArray([]);
             this.trackerFiles = ko.observableArray([]);
@@ -42,7 +41,7 @@ module RtcTorrent {
             if (!this.configuration.webRTCSupport) {
                 console.error('Your browser doesn\'t seem to support WebRTC');
             } else {
-                var _this = this;
+                var _this: IClient = this;
                 this.socket = $.connection.torrentHub;
                 $.connection.hub.logging = false;
                 $.connection.hub.start({

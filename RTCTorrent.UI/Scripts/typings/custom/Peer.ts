@@ -9,7 +9,7 @@ module RtcTorrent {
     export class Peer implements IPeer extends User {
         public channel: RTCDataChannel;
         public channelOpened: bool;
-        private mediaConstraints: MediaConstraints = {
+        public mediaConstraints: MediaConstraints = {
             mandatory: {
                 OfferToReceiveAudio: true,
                 OfferToReceiveVideo: true
@@ -19,7 +19,7 @@ module RtcTorrent {
         private pc: RTCPeerConnection = null;
         constructor(id: string, torrent: ITorrent) {
             super(id);
-            var _this = this;
+            var _this: IPeer = this;
             this.torrent = torrent;
             this.pc = this.torrent.client.configuration.createPeerConnection(this.handleConnection);
             this.handleConnection();
@@ -59,7 +59,7 @@ module RtcTorrent {
             }
         }
         start() {
-            var _this = this;
+            var _this: IPeer = this;
             console.log('creating offer');
             this.pc.createOffer(function (sessionDescription) {
                 console.log('setting local description');
@@ -70,7 +70,7 @@ module RtcTorrent {
             }, null, _this.mediaConstraints);
         }
         answer() {
-            var _this = this;
+            var _this: IPeer = this;
             console.log('creating answer');
             this.pc.createAnswer(function (sessionDescription) {
                 console.log('setting local description');
@@ -94,7 +94,7 @@ module RtcTorrent {
         }
         addDataChannelEvents(channel: RTCDataChannel) {
             console.log('addDataChannelEvents');
-            var _self = this;
+            var _this: IPeer = this;
             this.channel = channel;
             //this.channel.binaryType = 'blob';
             this.channel.onmessage = function (event: any) {
@@ -108,11 +108,11 @@ module RtcTorrent {
             };
             this.channel.onopen = function (event: Event) {
                 console.log('dataChannel onopen', event);
-                _self.channelOpened = true;
+                _this.channelOpened = true;
             };
             this.channel.onclose = function (event: Event) {
                 console.log('dataChannel onclose', event);
-                _self.channelOpened = false;
+                _this.channelOpened = false;
             };
             this.channel.onerror = function (event: Event) {
                 console.log('dataChannel onerror', event)

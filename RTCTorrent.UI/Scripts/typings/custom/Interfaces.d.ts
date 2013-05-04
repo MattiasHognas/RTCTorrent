@@ -62,7 +62,6 @@ interface IConfiguration {
     webRTCSupport: bool;
     setRemoteDescription: (handleConnection: () => void , localId: string, remoteId: string, pc: RTCPeerConnection, message: any) => void;
     addIceCandidate: (pc: RTCPeerConnection, message: any) => void;
-    pieceSize: number;
     requestQuota: (type: any, grantedBytes: any, quotaGranted: (e: any) => void , quotaError: (e: any) => void ) => void;
 }
 
@@ -92,7 +91,7 @@ interface ITrackerTorrent {
 interface ITrackerTorrentFile {
     fullPath: KnockoutObservableString;
     size: KnockoutObservableNumber;
-    hashes: KnockoutObservableArray;
+    pieces: KnockoutObservableArray;
 }
 
 interface ITorrent {
@@ -102,6 +101,7 @@ interface ITorrent {
     files: KnockoutObservableArray;
     readyToServe: KnockoutObservableBool;
     fs: any;
+    quotaError: (e: any) => void;
     createPeer: (id: string) => void;
     findPeer: (id: string) => IPeer;
     removePeer: (id: string) => void;
@@ -110,7 +110,9 @@ interface ITorrent {
 interface IPeer extends IUser {
     channel: RTCDataChannel;
     channelOpened: bool;
+    mediaConstraints: MediaConstraints;
     torrent: ITorrent;
+    pc: RTCPeerConnection;
     onJsepOffer: (message: any) => void;
     onJsepAnswer: (message: any) => void;
     onJsepCandidate: (message: any) => void;
@@ -123,5 +125,12 @@ interface IFileContent {
     reader: any;
     fullPath: string;
     size: number;
-    hashes: string[];
+    pieces: number[];
+    index: () => void;
+    loadPieces: (file: File) => void;
+    requestPiece: (startByte: number, stopByte: number) => void;
+    announcePiece: (startByte: number, stopByte: number) => void;
+    readPiece: (startByte: string, stopByte: number, result: (result: ArrayBuffer) => void) => void;
+    writePiece: (data: ArrayBuffer, startByte: number) => void;
+    write: (data: ArrayBuffer, startByte: number, fileEntry: any) => void;
 }
