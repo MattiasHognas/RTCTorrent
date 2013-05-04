@@ -60,7 +60,11 @@ module RtcTorrent {
                     _this.fs.root.getDirectory(trackerTorrent.id(), { create: true }, function (dirEntry) {
                         var reader = dirEntry.createReader();
                         for (var i = 0; i < trackerTorrent.files().length; i++)
-                            _this.files.push(new FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].pieces()));
+                            _this.files.push(new FileContent(_this,
+                                reader,
+                                trackerTorrent.id() + '/' + trackerTorrent.files()[i].fullPath(),
+                                trackerTorrent.files()[i].size(),
+                                trackerTorrent.files()[i].pieces()));
                     }, function (e) { console.log('getDictionary error', e) });
                 }, _this.quotaError);
             }, _this.quotaError);

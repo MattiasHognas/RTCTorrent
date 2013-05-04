@@ -12,6 +12,7 @@ var RtcTorrent;
         }
         FileContent.prototype.index = function () {
             var _this = this;
+            console.log(_this.torrent.fs.root.toURL());
             _this.torrent.fs.root.getFile(_this.fullPath, {
                 create: true,
                 exclusive: false

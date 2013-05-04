@@ -19,7 +19,9 @@ module RtcTorrent {
         }
         index() {
             var _this: IFileContent = this;
+            console.log(_this.torrent.fs.root.toURL());
             _this.torrent.fs.root.getFile(_this.fullPath, { create: true, exclusive: false }, function (fileEntry) {
+                //fileEntry.remove(function (e) { console.log('remove ok', e) }, function (e) { console.log('remove error', e) });
                 fileEntry.file(
                     function (file) {
                         fileEntry.createWriter(

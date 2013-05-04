@@ -51,7 +51,7 @@ var RtcTorrent;
                     }, function (dirEntry) {
                         var reader = dirEntry.createReader();
                         for(var i = 0; i < trackerTorrent.files().length; i++) {
-                            _this.files.push(new RtcTorrent.FileContent(_this, reader, trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].pieces()));
+                            _this.files.push(new RtcTorrent.FileContent(_this, reader, trackerTorrent.id() + '/' + trackerTorrent.files()[i].fullPath(), trackerTorrent.files()[i].size(), trackerTorrent.files()[i].pieces()));
                         }
                     }, function (e) {
                         console.log('getDictionary error', e);

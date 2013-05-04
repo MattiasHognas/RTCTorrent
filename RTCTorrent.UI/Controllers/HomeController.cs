@@ -9,8 +9,8 @@ namespace RTCTorrent.UI.Controllers
     {
         public ActionResult Index()
         {
+            // TODO: This is an example, should be red from uploaded torrents
             var torrents = new List<TorrentModel>();
-            // TODO: This is an example, list from uploaded torrents
             const string id = "6D80D046-6E45-4DBE-97D5-541FBCBB2E78";
             var files = new List<TorrentModelFile>();
             const int totalSize = (1024 * 1024) * 100; // 100 Mb
