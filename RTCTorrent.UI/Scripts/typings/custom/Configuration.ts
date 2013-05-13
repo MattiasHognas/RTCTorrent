@@ -2,11 +2,13 @@
 /// <reference path='../webrtc/RTCPeerConnection.d.ts' />
 /// <reference path='../knockout/knockout.d.ts' />
 /// <reference path="Interfaces.d.ts" />
+/// <reference path='Crypto.ts' />
 
 module RtcTorrent {
     'use strict';
     export class Configuration implements IConfiguration {
-        public requestQuota: (type: any, byteSize: number, quotaGranted: (availableBytes) => void , quotaError: (availableBytes) => void) => void;
+        public crypto: Crypto = new Crypto();
+        public requestQuota: (type: any, byteSize: number, quotaGranted: (availableBytes) => void , quotaError: (availableBytes) => void ) => void;
         public blobBuilder: () => any;
         public requestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) => void;
         public createPeerConnection: (handleConnection: () => void ) => RTCPeerConnection;

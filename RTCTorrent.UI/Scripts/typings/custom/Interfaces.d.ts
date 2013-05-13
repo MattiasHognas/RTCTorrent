@@ -52,7 +52,12 @@ interface RTCPeerConnection {
     onconnection: () => void;
 }
 
+interface ICrypto {
+    hex_sha1: (bytes: string) => string;
+}
+
 interface IConfiguration {
+    crypto: ICrypto;
     blobBuilder: () => any;
     requestFileSystem: (type: any, grantedBytes: any, quotaGranted: (e: any) => void, quotaError: (e: any) => void) => void;
     createPeerConnection: (handleConnection: () => void ) => RTCPeerConnection;
@@ -94,6 +99,12 @@ interface ITrackerTorrentFile {
     pieces: KnockoutObservableArray;
 }
 
+interface ITrackerTorrentFilePiece {
+    hash: KnockoutObservableString;
+    size: KnockoutObservableNumber;
+    startByte: KnockoutObservableNumber;
+}
+
 interface ITorrent {
     client: IClient;
     trackerTorrent: ITrackerTorrent;
@@ -125,7 +136,7 @@ interface IFileContent {
     reader: any;
     fullPath: string;
     size: number;
-    pieces: number[];
+    pieces: ITrackerTorrentFilePiece[];
     index: () => void;
     loadPieces: (file: File) => void;
     requestPiece: (startByte: number, stopByte: number) => void;

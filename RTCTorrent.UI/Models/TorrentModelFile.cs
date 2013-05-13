@@ -15,6 +15,20 @@ namespace RTCTorrent.UI.Models
         public long Size { get; set; }
         [DataMember]
         [JsonProperty(PropertyName = "pieces")]
-        public List<int> Pieces { get; set; }
+        public List<TorrentModelFilePiece> Pieces { get; set; }
+    }
+
+    [DataContract]
+    public class TorrentModelFilePiece
+    {
+        [DataMember]
+        [JsonProperty(PropertyName = "hash")]
+        public string Hash { get; set; }
+        [DataMember]
+        [JsonProperty(PropertyName = "size")]
+        public long Size { get; set; }
+        [DataMember]
+        [JsonProperty(PropertyName = "startByte")]
+        public int StartByte { get; set; }
     }
 }

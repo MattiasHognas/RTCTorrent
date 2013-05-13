@@ -46,7 +46,7 @@ var RtcTorrent;
                     var currentByte = 1;
                     for(var i = 0; i < _this.pieces.length; i++) {
                         var startByte = currentByte - 1;
-                        var stopByte = startByte + _this.pieces[i] - 1;
+                        var stopByte = startByte + _this.pieces[i].size() - 1;
                         var byte = bytes[startByte];
                         if(byte === undefined) {
                             _this.requestPiece(startByte, stopByte);
@@ -86,15 +86,25 @@ var RtcTorrent;
             });
         };
         FileContent.prototype.writePiece = function (data, startByte) {
-            var _this = this;
-            _this.torrent.fs.root.getFile(_this.fullPath, {
-                create: true,
-                exclusive: false
-            }, function (entry) {
-                _this.write(data, startByte, entry);
-            }, function (e) {
-                console.log('error', e);
+            var piece = ko.utils.arrayFirst(this.pieces, function (piece) {
+                return piece.startByte == piece.startByte;
             });
+            if(piece != null) {
+                var hash = this.torrent.client.configuration.crypto.hex_sha1(this.arraybuffer2string(data));
+                if(hash != piece.hash()) {
+                    this.requestPiece(piece.startByte(), piece.size() + piece.startByte());
+                } else {
+                    var _this = this;
+                    _this.torrent.fs.root.getFile(_this.fullPath, {
+                        create: true,
+                        exclusive: false
+                    }, function (entry) {
+                        _this.write(data, startByte, entry);
+                    }, function (e) {
+                        console.log('error', e);
+                    });
+                }
+            }
         };
         FileContent.prototype.write = function (data, startByte, fileEntry) {
             var _this = this;
@@ -108,6 +118,17 @@ var RtcTorrent;
             };
             fileWriter.seek(startByte);
             fileWriter.write(blobBuilder.getBlob());
+        };
+        FileContent.prototype.arraybuffer2string = function (buf) {
+            return String.fromCharCode.apply(null, new Uint16Array(buf));
+        };
+        FileContent.prototype.string2arraybuffer = function (str) {
+            var buf = new ArrayBuffer(str.length * 2);
+            var bufView = new Uint16Array(buf);
+            for(var i = 0, strLen = str.length; i < strLen; i++) {
+                bufView[i] = str.charCodeAt(i);
+            }
+            return buf;
         };
         return FileContent;
     })();

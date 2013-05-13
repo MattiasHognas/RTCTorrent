@@ -255,6 +255,13 @@
     <Content Include="Scripts\typings\custom\Configuration.min.js">
       <DependentUpon>Configuration.ts</DependentUpon>
     </Content>
+    <TypeScriptCompile Include="Scripts\typings\custom\Crypto.ts" />
+    <Content Include="Scripts\typings\custom\Crypto.js">
+      <DependentUpon>Crypto.ts</DependentUpon>
+    </Content>
+    <Content Include="Scripts\typings\custom\Crypto.min.js">
+      <DependentUpon>Crypto.ts</DependentUpon>
+    </Content>
     <Content Include="Scripts\typings\custom\FileContent.js">
       <DependentUpon>FileContent.ts</DependentUpon>
     </Content>
@@ -288,6 +295,13 @@
     </Content>
     <Content Include="Scripts\typings\custom\TrackerTorrentFile.min.js">
       <DependentUpon>TrackerTorrentFile.ts</DependentUpon>
+    </Content>
+    <TypeScriptCompile Include="Scripts\typings\custom\TrackerTorrentFilePiece.ts" />
+    <Content Include="Scripts\typings\custom\TrackerTorrentFilePiece.js">
+      <DependentUpon>TrackerTorrentFilePiece.ts</DependentUpon>
+    </Content>
+    <Content Include="Scripts\typings\custom\TrackerTorrentFilePiece.min.js">
+      <DependentUpon>TrackerTorrentFilePiece.ts</DependentUpon>
     </Content>
     <Content Include="Scripts\typings\custom\User.js">
       <DependentUpon>User.ts</DependentUpon>

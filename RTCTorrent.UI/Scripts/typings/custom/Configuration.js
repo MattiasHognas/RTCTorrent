@@ -3,6 +3,7 @@ var RtcTorrent;
     'use strict';
     var Configuration = (function () {
         function Configuration() {
+            this.crypto = new RtcTorrent.Crypto();
             this.webRTCSupport = true;
             var pcConfig = {
                 'iceServers': [

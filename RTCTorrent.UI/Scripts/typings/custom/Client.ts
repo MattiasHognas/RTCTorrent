@@ -30,7 +30,9 @@ module RtcTorrent {
                     _this.socket.server.joinTorrent({ SessionId: _this.id(), TorrentId: torrent.trackerTorrent.id() });
                 }
             };
-            this.removeTorrent = function(trackerTorrent: any) {
+            this.removeTorrent = function (trackerTorrent: any) {
+                //TODO: Remove file content?
+                //fileEntry.remove(function (e) { console.log('remove ok', e) }, function (e) { console.log('remove error', e) });
                 console.log('Removing torrent', trackerTorrent);
                 var torrent: ITorrent = _this.findTorrent(trackerTorrent.id);
                 if (torrent) {
